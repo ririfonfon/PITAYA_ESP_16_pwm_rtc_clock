@@ -2,10 +2,8 @@
 #define deep_sleep
 
 #include "esp_sleep.h"
-// #include "driver/gpio.h"
-// #include "esp_err.h"
 
-#define BUTTON_PIN_BITMASK 0x1
+// #define BUTTON_PIN_BITMASK 0x1
 
 RTC_DATA_ATTR int bootCount = 0;
 
@@ -66,6 +64,9 @@ void deep_sleep_init()
 
     // If you were to use ext1, you would use it like
     // esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK, ESP_EXT1_WAKEUP_ALL_LOW);
+
+    // Latch RTC Alarm
+    Rtc.LatchAlarmsTriggeredFlags();
 
     // Go to sleep now
     Serial.println("Going to sleep now");
