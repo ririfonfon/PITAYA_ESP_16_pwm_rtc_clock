@@ -52,8 +52,8 @@ void setup()
 
   // init clock
   init_clock();
-  alarm_set();
-  deep_sleep_init();
+  // alarm_set();
+  // deep_sleep_init();
 
 } // void setup()
 
@@ -62,4 +62,9 @@ void loop()
   check_btn();
   pwm_loop();
   clock_loop();
+  if (deep)
+  {
+    deep = false;
+    deep_sleep_init();
+  }
 } // void loop()
