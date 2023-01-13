@@ -42,4 +42,6 @@ bool list[MAX_CLIENT] = {false}; // client
 
 bool start = true;
 
+bool deep = false;
+
 #endif
