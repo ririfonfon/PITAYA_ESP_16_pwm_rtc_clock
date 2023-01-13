@@ -16,6 +16,9 @@ const uint16_t stringAddr = 64; // stored on page boundary
 RtcDateTime old;
 RtcDateTime alarmTime;
 
+// char DaysOfWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+char DaysOfWeek[7][12] = {"Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"};
+
 void printDateTime(const RtcDateTime &dt)
 {
     char datestring[20];
@@ -23,12 +26,14 @@ void printDateTime(const RtcDateTime &dt)
     snprintf_P(datestring,
                countof(datestring),
                PSTR("%02u/%02u/%04u %02u:%02u:%02u"),
-               dt.Month(),
                dt.Day(),
+               dt.Month(),
                dt.Year(),
                dt.Hour(),
                dt.Minute(),
                dt.Second());
+    Serial.print(DaysOfWeek[dt.DayOfWeek()]);
+    Serial.print(" ");
     Serial.print(datestring);
 }
 
@@ -40,11 +45,8 @@ void init_clock()
     Serial.println(__TIME__);
 
     //--------RTC SETUP ------------
-    // if you are using ESP-01 then uncomment the line below to reset the pins to
-    // the available pins for SDA, SCL
-    // Wire.begin(0, 2); // due to limited pins, use pin 0 and 2 for SDA, SCL
 
-    Rtc.Begin(22, 21);
+    Rtc.Begin(22, 21); // the available pins for SDA, SCL
     RtcEeprom.Begin();
 
     RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
@@ -115,7 +117,13 @@ void alarm_set()
 
     // Alarm 1 set to trigger every day when
     // the hours, minutes, and seconds match
+
     alarmTime = Rtc.GetDateTime() + 60; // into the future
+    
+    Serial.print(" next alarm set to ");
+    printDateTime(alarmTime);
+    Serial.println(" ");
+
     DS3231AlarmOne alarm1(
         alarmTime.Day(),
         alarmTime.Hour(),
@@ -125,22 +133,32 @@ void alarm_set()
     Rtc.SetAlarmOne(alarm1);
 
     // Alarm 2 set to trigger at the top of the minute
-    DS3231AlarmTwo alarm2(
-        0,
-        0,
-        0,
-        DS3231AlarmTwoControl_OncePerMinute);
-    Rtc.SetAlarmTwo(alarm2);
+
+    // DS3231AlarmTwo alarm2(
+    //     0,
+    //     0,
+    //     0,
+    //     DS3231AlarmTwoControl_HoursMinutesDayOfMonthMatch);
+    // Rtc.SetAlarmTwo(alarm2);
 
     // throw away any old alarm state before we ran
-    Rtc.LatchAlarmsTriggeredFlags();
+    // Rtc.LatchAlarmsTriggeredFlags();
 }
 
 void clock_loop()
 {
+    RtcDateTime now = Rtc.GetDateTime();
+    DS3231AlarmOne alarm_one = Rtc.GetAlarmOne();
+    RtcDateTime check_alarm(now.Year(),
+                            now.Month(),
+                            now.Day(),
+                            alarm_one.Hour(),
+                            alarm_one.Minute(),
+                            alarm_one.Second());
 
     if (!Rtc.IsDateTimeValid())
     {
+
         if (Rtc.LastError() != 0)
         {
             // we have a communications error
@@ -158,13 +176,13 @@ void clock_loop()
         return;
     }
 
-    RtcDateTime now = Rtc.GetDateTime();
-
     if (old != now)
     {
         old = now;
 
         printDateTime(now);
+        Serial.print("      **         check_alarm : ");
+        printDateTime(check_alarm);
         Serial.println();
 
         // read data
@@ -206,9 +224,17 @@ void clock_loop()
 #endif
     }
 
-    if ( alarmTime < Rtc.GetDateTime() + 15 )
+    if (check_alarm < Rtc.GetDateTime() - 60)
     {
+        Serial.println(" ");
+        Serial.print(" check_alarm : ");
+        printDateTime(check_alarm);
+        Serial.print(" time - 60 : ");
+        printDateTime(Rtc.GetDateTime() - 60);
+        Serial.println(" ");
+
         alarm_set();
+        deep = true;
     }
 
     return;
