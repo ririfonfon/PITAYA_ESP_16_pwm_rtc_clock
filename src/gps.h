@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
+#include <RtcDS3231.h>
 /*
    This sample code demonstrates the normal use of a TinyGPSPlus (TinyGPSPlus) object.
    It requires the use of SoftwareSerial, and assumes that you have a
@@ -20,6 +21,7 @@ SoftwareSerial ss(RXPin, TXPin);
 
 static void printDateTime(TinyGPSDate &d, TinyGPSTime &t);
 static void smartDelay(unsigned long ms);
+// static void GpsGetDateTime(TinyGPSDate &d, TinyGPSTime &t);
 
 static void publishSat(unsigned long val, bool valid, int len);
 static void publishLat(float val, bool valid, int len, int prec);
@@ -68,10 +70,10 @@ static void publishLat(float val, bool valid, int len, int prec)
     }
     else
     {
-        int val_int = (int)val; 
+        int val_int = (int)val;
         float val_float = (abs(val) - abs(val_int)) * 1000000;
         int val_fra = (int)val_float;
-        sprintf(sz, "%d.%d", val_int, val_fra); 
+        sprintf(sz, "%d.%d", val_int, val_fra);
     }
     mqttClient.publish(MQTT_TOPIC, 0, true, sz);
     smartDelay(0);
@@ -87,10 +89,10 @@ static void publishLong(float val, bool valid, int len, int prec)
     }
     else
     {
-        int val_int = (int)val; 
+        int val_int = (int)val;
         float val_float = (abs(val) - abs(val_int)) * 1000000;
         int val_fra = (int)val_float;
-        sprintf(sz, "%d.%d", val_int, val_fra); 
+        sprintf(sz, "%d.%d", val_int, val_fra);
     }
     mqttClient.publish(MQTT_TOPIC, 0, true, sz);
     smartDelay(0);
@@ -106,10 +108,10 @@ static void publishAlt(float val, bool valid, int len, int prec)
     }
     else
     {
-        int val_int = (int)val; 
+        int val_int = (int)val;
         float val_float = (abs(val) - abs(val_int)) * 1000000;
         int val_fra = (int)val_float;
-        sprintf(sz, "%d.%d", val_int, val_fra); 
+        sprintf(sz, "%d.%d", val_int, val_fra);
     }
     mqttClient.publish(MQTT_TOPIC, 0, true, sz);
     smartDelay(0);
@@ -158,5 +160,17 @@ static void printDateTime(TinyGPSDate &d, TinyGPSTime &t)
     // printInt(d.age(), d.isValid(), 5);
     smartDelay(0);
 }
+
+// static void GpsGetDateTime(TinyGPSDate &d, TinyGPSTime &t)
+// {
+//     uint16_t year = d.year();
+//     uint8_t month = d.month();
+//     uint8_t dayOfMonth = d.day();
+//     uint8_t hour = t.hour();
+//     uint8_t minute = t.minute();
+//     uint8_t second = t.second();
+
+//     return RtcDateTime(year, month, dayOfMonth, hour, minute, second);
+// }
 
 #endif
