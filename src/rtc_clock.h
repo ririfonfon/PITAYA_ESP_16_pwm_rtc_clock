@@ -39,12 +39,6 @@ void printDateTime(const RtcDateTime &dt)
 
 void init_clock()
 {
-
-    Serial.print("compiled DATE : ");
-    Serial.print(__DATE__);
-    Serial.print(" compiled TIME : ");
-    Serial.println(__TIME__);
-
     //--------RTC SETUP ------------
 
     Rtc.Begin(22, 21); // the available pins for SDA, SCL
@@ -52,7 +46,7 @@ void init_clock()
 
     RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
 
-    Serial.print("RtcDateTime comiled : ");
+    Serial.print("compiled : ");
     printDateTime(compiled);
     Serial.println();
 
@@ -80,7 +74,7 @@ void init_clock()
     }
 
     RtcDateTime now = Rtc.GetDateTime();
-    Serial.print("RtcDateTime now : ");
+    Serial.print("now : ");
     printDateTime(now);
     Serial.println();
     if (now < compiled)
@@ -90,7 +84,7 @@ void init_clock()
     }
 
     RtcDateTime now_gps = RtcDateTime (gps.date.year(),gps.date.month(),gps.date.day(),gps.time.hour(),gps.time.minute(),gps.time.second());
-    Serial.print("RtcDateTime now_gps : ");
+    Serial.print("now_gps : ");
     printDateTime(now_gps);
     Serial.println();
     if (now != now_gps)
