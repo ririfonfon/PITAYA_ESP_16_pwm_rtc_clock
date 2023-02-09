@@ -21,7 +21,6 @@ SoftwareSerial ss(RXPin, TXPin);
 
 static void printDateTime(TinyGPSDate &d, TinyGPSTime &t);
 static void smartDelay(unsigned long ms);
-// static void GpsGetDateTime(TinyGPSDate &d, TinyGPSTime &t);
 
 static void publishSat(unsigned long val, bool valid, int len);
 static void publishLat(float val, bool valid, int len, int prec);
@@ -165,21 +164,10 @@ static void printDateTime(TinyGPSDate &d, TinyGPSTime &t)
         sprintf(sz, "%02d:%02d:%02d ", t.hour(), t.minute(), t.second());
         Serial.print(sz);
     }
+    // Serial.print(gps.time.isValid());
 
     // printInt(d.age(), d.isValid(), 5);
     smartDelay(0);
 }
-
-// static void GpsGetDateTime(TinyGPSDate &d, TinyGPSTime &t)
-// {
-//     uint16_t year = d.year();
-//     uint8_t month = d.month();
-//     uint8_t dayOfMonth = d.day();
-//     uint8_t hour = t.hour();
-//     uint8_t minute = t.minute();
-//     uint8_t second = t.second();
-
-//     return RtcDateTime(year, month, dayOfMonth, hour, minute, second);
-// }
 
 #endif
