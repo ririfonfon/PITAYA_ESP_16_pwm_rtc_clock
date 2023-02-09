@@ -40,8 +40,9 @@ void printDateTime(const RtcDateTime &dt)
 void init_clock()
 {
 
-    Serial.print("compiled: ");
+    Serial.print("compiled DATE : ");
     Serial.print(__DATE__);
+    Serial.print(" compiled TIME : ");
     Serial.println(__TIME__);
 
     //--------RTC SETUP ------------
@@ -51,6 +52,7 @@ void init_clock()
 
     RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
 
+    Serial.print("RtcDateTime comiled : ");
     printDateTime(compiled);
     Serial.println();
 
@@ -78,22 +80,19 @@ void init_clock()
     }
 
     RtcDateTime now = Rtc.GetDateTime();
+    Serial.print("RtcDateTime now : ");
+    printDateTime(now);
+    Serial.println();
     if (now < compiled)
     {
         Serial.println("RTC is older than compile time!  (Updating DateTime)");
         Rtc.SetDateTime(compiled);
     }
-    // uint16_t gps_year = gps.date.year;
-    // uint8_t gps_month = gps.date.month;
-    // uint8_t gps_day = gps.date.day;
-    // uint8_t gps_hour = gps.time.hour;
-    // uint8_t gps_minute = gps.time.minute;
-    // uint8_t gps_second = gps.time.second;
 
-    // RtcDateTime now_gps = RtcDateTime (gps_year,gps_month,gps_day,gps_hour,gps_minute,gps_second);
-    
-    RtcDateTime now_gps = RtcDateTime (gps.date.year,gps.date.month,gps.date.day,gps.time.hour,gps.time.minute,gps.time.second);
-
+    RtcDateTime now_gps = RtcDateTime (gps.date.year(),gps.date.month(),gps.date.day(),gps.time.hour(),gps.time.minute(),gps.time.second());
+    Serial.print("RtcDateTime now_gps : ");
+    printDateTime(now_gps);
+    Serial.println();
     if (now != now_gps)
     {
         Serial.println("RTC != than gps time!  (Updating DateTime)");
