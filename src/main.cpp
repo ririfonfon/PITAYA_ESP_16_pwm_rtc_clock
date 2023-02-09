@@ -85,14 +85,15 @@ void setup()
 
 void loop()
 {
+  loop_gps();
+  loop_clock_mqtt();
+
   // check_btn();
   // pwm_loop();
-  // clock_loop();
   // if (deep)
   // {
   //   deep = false;
   //   deep_sleep_init();
   // }
 
-  loop_gps();
 } // void loop()
