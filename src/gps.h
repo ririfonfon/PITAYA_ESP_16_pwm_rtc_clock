@@ -35,10 +35,19 @@ void init_gps()
 
 void loop_gps()
 {
-    publishSat(gps.satellites.value(), gps.satellites.isValid(), 5);
+    if (gps.location.isUpdated())
+    {
     publishLat(gps.location.lat(), gps.location.isValid(), 11, 6);
     publishLong(gps.location.lng(), gps.location.isValid(), 12, 6);
+    }
+    if (gps.altitude.isUpdated())
+    {
     publishAlt(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
+    }
+    if (gps.satellites.isUpdated())
+    {
+    publishSat(gps.satellites.value(), gps.satellites.isValid(), 5);
+    }
 
     // printDateTime(gps.date, gps.time);
 
