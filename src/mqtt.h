@@ -31,6 +31,7 @@ void connectToWifi()
 {
     Serial.println("Connecting to Wi-Fi...");
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    delay(500);
 }
 
 void connectToMqtt()
@@ -67,8 +68,11 @@ void onMqttConnect(bool sessionPresent)
     mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() +1);
     uint16_t packetIdSub = mqttClient.subscribe(MQTT_TOPIC, 2);
     Serial.print("Subscribing at QoS 2, packetId: ");
-    Serial.println(packetIdSub);
-    mqttClient.publish(MQTT_TOPIC, 0, true, "test 1");
+    Serial.print(packetIdSub);
+    Serial.print(" TOPIC : ");
+    Serial.println(MQTT_TOPIC);
+
+    // mqttClient.publish(MQTT_TOPIC, 0, true, "test 1");
     //   Serial.println("Publishing at QoS 0");
     //   uint16_t packetIdPub1 = mqttClient.publish("test/lol", 1, true, "test 2");
     //   Serial.print("Publishing at QoS 1, packetId: ");
@@ -132,7 +136,6 @@ void onMqttPublish(uint16_t packetId)
 
 void init_mqtt()
 {
-    //   Serial.begin(115200);
     Serial.println();
     Serial.println();
 
