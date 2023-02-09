@@ -57,8 +57,10 @@ void setup()
   delay(1000);
 
   init_gps();
-  delay(2000);
-
+  while (gps.time.isValid() && gps.date.isValid())
+  {
+    /* code */
+  }
   init_clock();
 
   // alarm_set();
