@@ -32,9 +32,40 @@ void printDateTime(const RtcDateTime &dt)
                dt.Hour(),
                dt.Minute(),
                dt.Second());
+    Serial.print("RTC-> ");
     Serial.print(DaysOfWeek[dt.DayOfWeek()]);
     Serial.print(" ");
     Serial.print(datestring);
+}
+
+void publishTimeOn(const RtcDateTime &dt)
+{
+    char datestring[20];
+
+    snprintf_P(datestring,
+               countof(datestring),
+               PSTR("%02u:%02u:%02u"),
+               dt.Hour(),
+               dt.Minute(),
+               dt.Second());
+    mqtt_topic = String(MQTT) + String(ID) + String(MQTT_TIME_ON);
+    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
+    mqttClient.publish(MQTT_TOPIC, 0, true, datestring);
+}
+
+void publishTimeOff(const RtcDateTime &dt)
+{
+    char datestring[20];
+
+    snprintf_P(datestring,
+               countof(datestring),
+               PSTR("%02u:%02u:%02u"),
+               dt.Hour(),
+               dt.Minute(),
+               dt.Second());
+    mqtt_topic = String(MQTT) + String(ID) + String(MQTT_TIME_OFF);
+    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
+    mqttClient.publish(MQTT_TOPIC, 0, true, datestring);
 }
 
 void init_clock()
@@ -83,7 +114,7 @@ void init_clock()
         Rtc.SetDateTime(compiled);
     }
 
-    RtcDateTime now_gps = RtcDateTime (gps.date.year(),gps.date.month(),gps.date.day(),gps.time.hour(),gps.time.minute(),gps.time.second());
+    RtcDateTime now_gps = RtcDateTime(gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second());
     Serial.print("now_gps : ");
     printDateTime(now_gps);
     Serial.println();
@@ -128,7 +159,7 @@ void alarm_set()
     // the hours, minutes, and seconds match
 
     alarmTime = Rtc.GetDateTime() + 60; // into the future
-    
+
     Serial.print(" next alarm set to ");
     printDateTime(alarmTime);
     Serial.println(" ");
@@ -154,16 +185,22 @@ void alarm_set()
     // Rtc.LatchAlarmsTriggeredFlags();
 }
 
-void clock_loop()
+void loop_clock_mqtt()
 {
     RtcDateTime now = Rtc.GetDateTime();
     DS3231AlarmOne alarm_one = Rtc.GetAlarmOne();
-    RtcDateTime check_alarm(now.Year(),
-                            now.Month(),
-                            now.Day(),
-                            alarm_one.Hour(),
-                            alarm_one.Minute(),
-                            alarm_one.Second());
+    RtcDateTime time_on(now.Year(),
+                        now.Month(),
+                        now.Day(),
+                        alarm_one.Hour(),
+                        alarm_one.Minute(),
+                        alarm_one.Second());
+    RtcDateTime time_off(now.Year(),
+                        now.Month(),
+                        now.Day(),
+                        23,
+                        30,
+                        00);
 
     if (!Rtc.IsDateTimeValid())
     {
@@ -185,13 +222,16 @@ void clock_loop()
         return;
     }
 
-    if (old != now)
+    if (old < now - 60)
     {
         old = now;
 
         printDateTime(now);
-        Serial.print("      **         check_alarm : ");
-        printDateTime(check_alarm);
+        Serial.print("      **         time_on : ");
+        printDateTime(time_on);
+        publishTimeOn(time_on);
+        publishTimeOff(time_off);
+
         Serial.println();
 
         // read data
@@ -203,48 +243,20 @@ void clock_loop()
             Serial.print("address didn't match ");
             Serial.println(address);
         }
-#ifdef clock_eeprom_debug
-        {
-            // get the size of the data from address 1
-            uint8_t count = RtcEeprom.GetMemory(1);
-            uint8_t buff[64];
-
-            // get our data from the address with the given size
-            uint8_t gotten = RtcEeprom.GetMemory(address, buff, count);
-
-            if (gotten != count ||
-                count != sizeof(data) - 1) // remove the extra null terminator strings add
-            {
-                Serial.print("something didn't match, count = ");
-                Serial.print(count, DEC);
-                Serial.print(", gotten = ");
-                Serial.print(gotten, DEC);
-                Serial.println();
-            }
-            Serial.print("data read (");
-            Serial.print(gotten);
-            Serial.print(") = \"");
-            for (uint8_t ch = 0; ch < gotten; ch++)
-            {
-                Serial.print((char)buff[ch]);
-            }
-            Serial.println("\"");
-        }
-#endif
     }
 
-    if (check_alarm < Rtc.GetDateTime() - 60)
-    {
-        Serial.println(" ");
-        Serial.print(" check_alarm : ");
-        printDateTime(check_alarm);
-        Serial.print(" time - 60 : ");
-        printDateTime(Rtc.GetDateTime() - 60);
-        Serial.println(" ");
+    // if (time_on < Rtc.GetDateTime() - 60)
+    // {
+    //     Serial.println(" ");
+    //     Serial.print(" time_on : ");
+    //     printDateTime(time_on);
+    //     Serial.print(" time - 60 : ");
+    //     printDateTime(Rtc.GetDateTime() - 60);
+    //     Serial.println(" ");
 
-        alarm_set();
-        deep = true;
-    }
+    //     alarm_set();
+    //     deep = true;
+    // }
 
     return;
 }
