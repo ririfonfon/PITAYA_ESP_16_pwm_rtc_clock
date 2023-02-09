@@ -54,13 +54,28 @@ void setup()
   //   WiFi.mode(WIFI_OFF);
 
   init_mqtt();
-  delay(1000);
 
   init_gps();
-  while (gps.time.isValid() && gps.date.isValid())
+
+  boolean hasFix = false;
+  while (!hasFix)
   {
-    /* code */
+    while (!gps.time.isValid())
+    {
+      printDateTime(gps.date, gps.time);
+      Serial.print(".");
+      smartDelay(1000);
+
+      if (millis() > 5000 && gps.charsProcessed() < 10)
+        Serial.println(F("No GPS data received: check wiring"));
+    }
+    if (gps.time.isValid() && gps.date.isValid())
+    {
+      Serial.println("GPS Time OK");
+      hasFix = true;
+    }
   }
+
   init_clock();
 
   // alarm_set();
