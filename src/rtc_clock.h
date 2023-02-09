@@ -83,6 +83,22 @@ void init_clock()
         Serial.println("RTC is older than compile time!  (Updating DateTime)");
         Rtc.SetDateTime(compiled);
     }
+    // uint16_t gps_year = gps.date.year;
+    // uint8_t gps_month = gps.date.month;
+    // uint8_t gps_day = gps.date.day;
+    // uint8_t gps_hour = gps.time.hour;
+    // uint8_t gps_minute = gps.time.minute;
+    // uint8_t gps_second = gps.time.second;
+
+    // RtcDateTime now_gps = RtcDateTime (gps_year,gps_month,gps_day,gps_hour,gps_minute,gps_second);
+    
+    RtcDateTime now_gps = RtcDateTime (gps.date.year,gps.date.month,gps.date.day,gps.time.hour,gps.time.minute,gps.time.second);
+
+    if (now != now_gps)
+    {
+        Serial.println("RTC != than gps time!  (Updating DateTime)");
+        Rtc.SetDateTime(now_gps);
+    }
 
     // never assume the Rtc was last configured by you, so
     // just clear them to your needed state
