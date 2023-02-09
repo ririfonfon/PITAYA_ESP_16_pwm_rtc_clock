@@ -26,6 +26,8 @@ String MQTT_SAT = "/sat";
 String MQTT_ALT = "/alt";
 String MQTT_LONG = "/long";
 String MQTT_LAT = "/lat";
+String MQTT_TIME_ON = "/timeon";
+String MQTT_TIME_OFF = "/timeoff";
 
 void connectToWifi()
 {
