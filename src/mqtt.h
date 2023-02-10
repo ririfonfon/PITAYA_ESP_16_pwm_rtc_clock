@@ -19,7 +19,7 @@ AsyncMqttClient mqttClient;
 TimerHandle_t mqttReconnectTimer;
 TimerHandle_t wifiReconnectTimer;
 
-char MQTT_TOPIC[] ="******************************";
+char MQTT_TOPIC[] = "******************************";
 String mqtt_topic;
 String MQTT = "gps/";
 String MQTT_SAT = "/sat";
@@ -28,12 +28,18 @@ String MQTT_LONG = "/long";
 String MQTT_LAT = "/lat";
 String MQTT_TIME_ON = "/timeon";
 String MQTT_TIME_OFF = "/timeoff";
+boolean wifihasFix = false;
 
 void connectToWifi()
 {
     Serial.println("Connecting to Wi-Fi...");
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    delay(500);
+
+    while (!wifihasFix)
+    {
+        Serial.print(".");
+        delay(1000);
+    }
 }
 
 void connectToMqtt()
@@ -51,6 +57,7 @@ void WiFiEvent(WiFiEvent_t event)
         Serial.println("WiFi connected");
         Serial.println("IP address: ");
         Serial.println(WiFi.localIP());
+        wifihasFix = true;
         connectToMqtt();
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
@@ -67,10 +74,18 @@ void onMqttConnect(bool sessionPresent)
     Serial.print("Session present: ");
     Serial.println(sessionPresent);
     mqtt_topic = String(MQTT) + String(ID);
-    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() +1);
+    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
     uint16_t packetIdSub = mqttClient.subscribe(MQTT_TOPIC, 2);
     Serial.print("Subscribing at QoS 2, packetId: ");
     Serial.print(packetIdSub);
+    Serial.print(" TOPIC : ");
+    Serial.println(MQTT_TOPIC);
+
+    mqtt_topic = String(MQTT) + String("all");
+    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
+    uint16_t packetIdSub2 = mqttClient.subscribe(MQTT_TOPIC, 2);
+    Serial.print("Subscribing at QoS 2, packetId: ");
+    Serial.print(packetIdSub2);
     Serial.print(" TOPIC : ");
     Serial.println(MQTT_TOPIC);
 

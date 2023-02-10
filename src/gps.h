@@ -30,22 +30,39 @@ static void publishLong(float val, bool valid, int len, int prec);
 void init_gps()
 {
     ss.begin(GPSBaud);
+    boolean hasFix = false;
+    while (!hasFix)
+    {
+        while (!ss.availableForWrite())
+        {
+            Serial.print(".");
+            smartDelay(1000);
+
+            if (millis() > 5000 && gps.charsProcessed() < 10)
+                Serial.println(F("No GPS data received: check wiring"));
+        }
+        if (ss.availableForWrite())
+        {
+            Serial.println("SS OK");
+            hasFix = true;
+        }
+    }
 }
 
 void loop_gps()
 {
     if (gps.location.isUpdated())
     {
-    publishLat(gps.location.lat(), gps.location.isValid(), 11, 6);
-    publishLong(gps.location.lng(), gps.location.isValid(), 12, 6);
+        publishLat(gps.location.lat(), gps.location.isValid(), 11, 6);
+        publishLong(gps.location.lng(), gps.location.isValid(), 12, 6);
     }
     if (gps.altitude.isUpdated())
     {
-    publishAlt(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
+        publishAlt(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
     }
     if (gps.satellites.isUpdated())
     {
-    publishSat(gps.satellites.value(), gps.satellites.isValid(), 5);
+        publishSat(gps.satellites.value(), gps.satellites.isValid(), 5);
     }
 
     // printDateTime(gps.date, gps.time);

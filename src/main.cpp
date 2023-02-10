@@ -62,7 +62,6 @@ void setup()
   {
     while (!gps.time.isValid())
     {
-      printDateTime(gps.date, gps.time);
       Serial.print(".");
       smartDelay(1000);
 
@@ -71,7 +70,8 @@ void setup()
     }
     if (gps.time.isValid() && gps.date.isValid())
     {
-      Serial.println("GPS Time OK");
+      Serial.println("GPS Time OK ");
+      printDateTime(gps.date, gps.time);
       hasFix = true;
     }
   }
