@@ -105,23 +105,31 @@ void init_clock()
     }
 
     RtcDateTime now = Rtc.GetDateTime();
+    RtcDateTime now_gps = RtcDateTime(gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second());
     Serial.print("now : ");
     printDateTime(now);
-    Serial.println();
-    if (now < compiled)
-    {
-        Serial.println("RTC is older than compile time!  (Updating DateTime)");
-        Rtc.SetDateTime(compiled);
-    }
-
-    RtcDateTime now_gps = RtcDateTime(gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second());
-    Serial.print("now_gps : ");
+    Serial.print(" now_gps : ");
     printDateTime(now_gps);
     Serial.println();
+
+    // if (now < compiled)
+    // {
+    //     Serial.println("RTC is older than compile time!  (Updating DateTime)");
+    //     Rtc.SetDateTime(compiled);
+    // }
+
     if (now != now_gps)
     {
-        Serial.println("RTC != than gps time!  (Updating DateTime)");
-        Rtc.SetDateTime(now_gps);
+        bool zeroclock = false;
+        while (!zeroclock)
+        {
+            if (gps.time.centisecond() == 0)
+            {
+                Rtc.SetDateTime(now_gps);
+                Serial.println("RTC != than gps time!  (Updating DateTime)");
+                zeroclock = true;
+            }
+        }
     }
 
     // never assume the Rtc was last configured by you, so
@@ -196,11 +204,11 @@ void loop_clock_mqtt()
                         alarm_one.Minute(),
                         alarm_one.Second());
     RtcDateTime time_off(now.Year(),
-                        now.Month(),
-                        now.Day(),
-                        23,
-                        30,
-                        00);
+                         now.Month(),
+                         now.Day(),
+                         23,
+                         30,
+                         00);
 
     if (!Rtc.IsDateTimeValid())
     {
