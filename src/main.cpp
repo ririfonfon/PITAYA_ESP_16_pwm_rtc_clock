@@ -9,12 +9,12 @@
 #include "led.h"
 #include "random.h"
 #include "wifi_serv_setup.h"
-#include "btn.h"
-#include "pwm_loop.h"
 #include "mqtt.h"
 #include "gps.h"
 #include "rtc_clock.h"
 #include "deep_sleep.h"
+#include "btn.h"
+#include "pwm_loop.h"
 
 void setup()
 {
@@ -31,8 +31,8 @@ void setup()
   //   // init led
   //   init_led();
 
-  //   // init btn
-  //   init_btn();
+    // init btn
+    init_btn();
 
   //   // init pwm
   //   for (int k = 0; k < PWM_CHANNELS; k++)
@@ -85,10 +85,9 @@ void setup()
 
 void loop()
 {
-  loop_gps();
-  loop_clock_mqtt();
+  
 
-  // check_btn();
+  check_btn();
   // pwm_loop();
   // if (deep)
   // {
