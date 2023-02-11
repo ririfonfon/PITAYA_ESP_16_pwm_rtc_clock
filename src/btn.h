@@ -1,9 +1,13 @@
 #ifndef btn_h
 #define btn_h
 
+#include "Arduino.h"
+
 void init_btn()
 {
     pinMode(BTN_GPIOPIN, INPUT);
+    pinMode(CMD_GPIOPIN,OUTPUT);
+    digitalWrite(CMD_GPIOPIN,LOW);
 }
 
 void check_btn()
@@ -12,36 +16,20 @@ void check_btn()
 
     if (btn_State == HIGH)
     {
-
-        if (btn == true)
-        {
-            btn = false;
-        }
-        if (btn == false)
-        {
-            btn = true;
-        }
+        digitalWrite(CMD_GPIOPIN,HIGH);
 #ifdef DEBUG
-        Serial.print("(btn_State == HIGH) btn = ");
-        Serial.println(btn);
+        Serial.print("(btn_State == HIGH)");
 #endif
     }
-    while (btn)
+    while (btn_State)
     {
-        if (start)
-        {
-            WiFi.mode(WIFI_AP);
-            start = false;
-            for (int d = 0; d < FOR_PWM_CHANNELS; d++)
-            {
-                ledcWrite(d, 0);
-            } //for(int d=0; d>FOR_PWM_CHANNELS;d++)
-        }
-        webSocket.loop();
-        server.handleClient();
+        loop_gps();
+        loop_clock_mqtt();
+
         onboard_led.on = millis() % 400 < 200;
         onboard_led.update();
     }
+    digitalWrite(CMD_GPIOPIN,LOW);
 }
 
 #endif
