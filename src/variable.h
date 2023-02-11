@@ -7,6 +7,7 @@
 
 uint8_t PWM_GPIOPIN[14] = {32, 33, 25, 26, 27, 14, 12, 13, 23, 19, 18, 5, 4, 0};
 uint8_t BTN_GPIOPIN = 15;
+uint8_t CMD_GPIOPIN = 35;
 
 long previousMillis = 0;
 bool cycle = true;
