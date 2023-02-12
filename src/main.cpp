@@ -28,8 +28,8 @@ void setup()
   //   EEPROM.begin(EEPROM_SIZE);
   //   init_eeprom();
 
-  //   // init led
-  //   init_led();
+    // init led
+    init_led();
 
     // init btn
     init_btn();
