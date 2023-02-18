@@ -152,22 +152,30 @@ void onMqttUnsubscribe(uint16_t packetId)
 void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total)
 {
 #ifdef DEBUG
-    Serial.println("Publish received.");
+    Serial.print("Publish received. ");
     Serial.print("  topic: ");
-    Serial.println(topic);
+    Serial.print(topic);
     Serial.print("  qos: ");
-    Serial.println(properties.qos);
+    Serial.print(properties.qos);
     Serial.print("  dup: ");
-    Serial.println(properties.dup);
+    Serial.print(properties.dup);
     Serial.print("  retain: ");
-    Serial.println(properties.retain);
+    Serial.print(properties.retain);
     Serial.print("  len: ");
-    Serial.println(len);
+    Serial.print(len);
     Serial.print("  index: ");
-    Serial.println(index);
+    Serial.print(index);
     Serial.print("  total: ");
     Serial.println(total);
 #endif
+    if (strcmp(topic, "gps/all") == 0)
+    {
+#ifdef DEBUG
+        Serial.print("gps/all  ");
+        Serial.print("  raconte: ");
+        Serial.println(payload);
+#endif
+    }
 }
 
 void onMqttPublish(uint16_t packetId)
