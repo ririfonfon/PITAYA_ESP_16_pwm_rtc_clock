@@ -37,10 +37,6 @@ bool btn = false;
 
 bool init_w = false;
 
-#define MAX_CLIENT 6
-int clientn = 0;
-bool list[MAX_CLIENT] = {false}; // client
-
 bool start = true;
 
 bool deep = false;
