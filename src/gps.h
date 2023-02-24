@@ -88,7 +88,7 @@ static void smartDelay(unsigned long ms)
 static void publishLat(float val, bool valid, int len, int prec)
 {
     mqtt_topic = String(MQTT) + String(ID) + String(MQTT_LAT);
-    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
+    mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
     char sz[32] = "*****************";
     if (!valid)
     {
@@ -100,14 +100,14 @@ static void publishLat(float val, bool valid, int len, int prec)
         int val_fra = (int)val_float;
         sprintf(sz, "%d.%d", val_int, val_fra);
     }
-    mqttClient.publish(MQTT_TOPIC, 0, true, sz);
+    mqttClient.publish(mqtt_topic_char, 0, true, sz);
     smartDelay(0);
 }
 
 static void publishLong(float val, bool valid, int len, int prec)
 {
     mqtt_topic = String(MQTT) + String(ID) + String(MQTT_LONG);
-    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
+    mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
     char sz[32] = "*****************";
     if (!valid)
     {
@@ -119,14 +119,14 @@ static void publishLong(float val, bool valid, int len, int prec)
         int val_fra = (int)val_float;
         sprintf(sz, "%d.%d", val_int, val_fra);
     }
-    mqttClient.publish(MQTT_TOPIC, 0, true, sz);
+    mqttClient.publish(mqtt_topic_char, 0, true, sz);
     smartDelay(0);
 }
 
 static void publishAlt(float val, bool valid, int len, int prec)
 {
     mqtt_topic = String(MQTT) + String(ID) + String(MQTT_ALT);
-    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
+    mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
     char sz[32] = "*****************";
     if (!valid)
     {
@@ -138,7 +138,7 @@ static void publishAlt(float val, bool valid, int len, int prec)
         int val_fra = (int)val_float;
         sprintf(sz, "%d.%d", val_int, val_fra);
     }
-    mqttClient.publish(MQTT_TOPIC, 0, true, sz);
+    mqttClient.publish(mqtt_topic_char, 0, true, sz);
     smartDelay(0);
 }
 
@@ -153,8 +153,8 @@ static void publishSat(unsigned long val, bool valid, int len)
     if (len > 0)
         sz[len - 1] = ' ';
     mqtt_topic = String(MQTT) + String(ID) + String(MQTT_SAT);
-    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
-    mqttClient.publish(MQTT_TOPIC, 0, true, sz);
+    mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
+    mqttClient.publish(mqtt_topic_char, 0, true, sz);
     smartDelay(0);
 }
 
