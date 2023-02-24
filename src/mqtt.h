@@ -19,7 +19,14 @@ AsyncMqttClient mqttClient;
 TimerHandle_t mqttReconnectTimer;
 TimerHandle_t wifiReconnectTimer;
 
-char MQTT_TOPIC[] = "******************************";
+char mqtt_topic_char[64];
+char mqtt_topic_char_id[8];
+char mqtt_topic_char_set_time_on[32];
+char mqtt_topic_char_set_time_off[32];
+char mqtt_topic_char_set_alt_coef[32];
+char mqtt_topic_char_set_lat_coef[32];
+char mqtt_topic_char_set_long_coef[32];
+
 String mqtt_topic;
 String MQTT = "gps/";
 String MQTT_SAT = "/sat";
@@ -28,8 +35,15 @@ String MQTT_LONG = "/long";
 String MQTT_LAT = "/lat";
 String MQTT_TIME_ON = "/timeon";
 String MQTT_TIME_OFF = "/timeoff";
-boolean wifihasFix = false;
 
+String MQTT_ID = String(MQTT) + String(ID);
+String MQTT_SET_TIME_ON = String (MQTT_ID) + "/set/time_on";
+String MQTT_SET_TIME_OFF = String (MQTT_ID) + "/set/time_off";
+String MQTT_SET_ALT_COEF = String (MQTT_ID) + "/set/alt_coef";
+String MQTT_SET_LAT_COEF = String (MQTT_ID) + "/set/lat_coef";
+String MQTT_SET_LONG_COEF = String (MQTT_ID) + "/set/long_coef";
+
+boolean wifihasFix = false;
 void connectToWifi()
 {
 #ifdef DEBUG
@@ -87,34 +101,65 @@ void onMqttConnect(bool sessionPresent)
     Serial.print("Session present: ");
     Serial.println(sessionPresent);
 #endif
-    mqtt_topic = String(MQTT) + String(ID);
-    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
-    uint16_t packetIdSub = mqttClient.subscribe(MQTT_TOPIC, 2);
+    MQTT_ID.toCharArray(mqtt_topic_char, MQTT_ID.length() + 1);
+    uint16_t packetIdSub = mqttClient.subscribe(mqtt_topic_char, 2);
 #ifdef DEBUG
     Serial.print("Subscribing at QoS 2, packetId: ");
     Serial.print(packetIdSub);
     Serial.print(" TOPIC : ");
-    Serial.println(MQTT_TOPIC);
+    Serial.println(mqtt_topic_char);
 #endif
-
     mqtt_topic = String(MQTT) + String("all");
-    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
-    uint16_t packetIdSub2 = mqttClient.subscribe(MQTT_TOPIC, 2);
+    mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
+    uint16_t packetIdSub2 = mqttClient.subscribe(mqtt_topic_char, 2);
 #ifdef DEBUG
     Serial.print("Subscribing at QoS 2, packetId: ");
     Serial.print(packetIdSub2);
     Serial.print(" TOPIC : ");
-    Serial.println(MQTT_TOPIC);
+    Serial.println(mqtt_topic_char);
+#endif
+    MQTT_SET_TIME_ON.toCharArray(mqtt_topic_char, MQTT_SET_TIME_ON.length() + 1);
+    uint16_t packetIdSub3 = mqttClient.subscribe(mqtt_topic_char, 2);
+#ifdef DEBUG
+    Serial.print("Subscribing at QoS 2, packetId: ");
+    Serial.print(packetIdSub3);
+    Serial.print(" TOPIC : ");
+    Serial.println(mqtt_topic_char);
+#endif
+    MQTT_SET_TIME_OFF.toCharArray(mqtt_topic_char, MQTT_SET_TIME_OFF.length() + 1);
+    uint16_t packetIdSub4 = mqttClient.subscribe(mqtt_topic_char, 2);
+#ifdef DEBUG
+    Serial.print("Subscribing at QoS 2, packetId: ");
+    Serial.print(packetIdSub4);
+    Serial.print(" TOPIC : ");
+    Serial.println(mqtt_topic_char);
+#endif
+    MQTT_SET_ALT_COEF.toCharArray(mqtt_topic_char, MQTT_SET_ALT_COEF.length() + 1);
+    uint16_t packetIdSub5 = mqttClient.subscribe(mqtt_topic_char, 2);
+#ifdef DEBUG
+    Serial.print("Subscribing at QoS 2, packetId: ");
+    Serial.print(packetIdSub5);
+    Serial.print(" TOPIC : ");
+    Serial.println(mqtt_topic_char);
+#endif
+    MQTT_SET_LAT_COEF.toCharArray(mqtt_topic_char, MQTT_SET_LAT_COEF.length() + 1);
+    uint16_t packetIdSub6 = mqttClient.subscribe(mqtt_topic_char, 2);
+#ifdef DEBUG
+    Serial.print("Subscribing at QoS 2, packetId: ");
+    Serial.print(packetIdSub6);
+    Serial.print(" TOPIC : ");
+    Serial.println(mqtt_topic_char);
+#endif
+    MQTT_SET_LONG_COEF.toCharArray(mqtt_topic_char, MQTT_SET_LONG_COEF.length() + 1);
+    uint16_t packetIdSub7 = mqttClient.subscribe(mqtt_topic_char, 2);
+#ifdef DEBUG
+    Serial.print("Subscribing at QoS 2, packetId: ");
+    Serial.print(packetIdSub7);
+    Serial.print(" TOPIC : ");
+    Serial.println(mqtt_topic_char);
 #endif
 
-    // mqttClient.publish(MQTT_TOPIC, 0, true, "test 1");
-    //   Serial.println("Publishing at QoS 0");
-    //   uint16_t packetIdPub1 = mqttClient.publish("test/lol", 1, true, "test 2");
-    //   Serial.print("Publishing at QoS 1, packetId: ");
-    //   Serial.println(packetIdPub1);
-    //   uint16_t packetIdPub2 = mqttClient.publish("test/lol", 2, true, "test 3");
-    //   Serial.print("Publishing at QoS 2, packetId: ");
-    //   Serial.println(packetIdPub2);
+
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
@@ -132,9 +177,9 @@ void onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
 void onMqttSubscribe(uint16_t packetId, uint8_t qos)
 {
 #ifdef DEBUG
-    Serial.println("Subscribe acknowledged.");
+    Serial.print("Subscribe acknowledged.");
     Serial.print("  packetId: ");
-    Serial.println(packetId);
+    Serial.print(packetId);
     Serial.print("  qos: ");
     Serial.println(qos);
 #endif
@@ -151,6 +196,22 @@ void onMqttUnsubscribe(uint16_t packetId)
 
 void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total)
 {
+    MQTT_ID.toCharArray(mqtt_topic_char_id, MQTT_ID.length() + 1);
+    MQTT_SET_TIME_ON.toCharArray(mqtt_topic_char_set_time_on, MQTT_ID.length() + 1);
+    MQTT_SET_TIME_OFF.toCharArray(mqtt_topic_char_set_time_off, MQTT_ID.length() + 1);
+    MQTT_SET_ALT_COEF.toCharArray(mqtt_topic_char_set_alt_coef, MQTT_ID.length() + 1);
+    MQTT_SET_LAT_COEF.toCharArray(mqtt_topic_char_set_lat_coef, MQTT_ID.length() + 1);
+    MQTT_SET_LONG_COEF.toCharArray(mqtt_topic_char_set_long_coef, MQTT_ID.length() + 1);
+    // Serial.print("MQTT_SET_TIME_ON :");
+    // Serial.println(MQTT_SET_TIME_ON);
+    // Serial.print("MQTT_SET_TIME_OFF :");
+    // Serial.println(MQTT_SET_TIME_OFF);
+    // Serial.print("MQTT_SET_ALT_COEF :");
+    // Serial.println(MQTT_SET_ALT_COEF);
+    // Serial.print("MQTT_SET_LAT_COEF :");
+    // Serial.println(MQTT_SET_LAT_COEF);
+    // Serial.print("MQTT_SET_LONG_COEF :");
+    // Serial.println(MQTT_SET_LONG_COEF);
 #ifdef DEBUG
     Serial.print("Publish received. ");
     Serial.print("  topic: ");
@@ -172,6 +233,55 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
     {
 #ifdef DEBUG
         Serial.print("gps/all  ");
+        Serial.print("  raconte: ");
+        Serial.println(payload);
+#endif
+    }
+    else if (strcmp(topic, mqtt_topic_char_id) == 0)
+    {
+#ifdef DEBUG
+        Serial.print(MQTT_ID);
+        Serial.print("  raconte: ");
+        Serial.println(payload);
+#endif
+    }
+    else if (strcmp(topic, "gps/12/set/time_on") == 0)
+    // else if (strcmp(topic, mqtt_topic_char_set_time_on) == 0)
+    {
+#ifdef DEBUG
+        Serial.print(MQTT_SET_TIME_ON);
+        Serial.print("  raconte: ");
+        Serial.println(payload);
+#endif
+    }
+    else if (strcmp(topic, mqtt_topic_char_set_time_off) == 0)
+    {
+#ifdef DEBUG
+        Serial.print(MQTT_SET_TIME_OFF);
+        Serial.print("  raconte: ");
+        Serial.println(payload);
+#endif
+    }
+    else if (strcmp(topic, mqtt_topic_char_set_alt_coef) == 0)
+    {
+#ifdef DEBUG
+        Serial.print(MQTT_SET_ALT_COEF);
+        Serial.print("  raconte: ");
+        Serial.println(payload);
+#endif
+    }
+    else if (strcmp(topic, mqtt_topic_char_set_lat_coef) == 0)
+    {
+#ifdef DEBUG
+        Serial.print(MQTT_SET_LAT_COEF);
+        Serial.print("  raconte: ");
+        Serial.println(payload);
+#endif
+    }
+    else if (strcmp(topic, mqtt_topic_char_set_long_coef) == 0)
+    {
+#ifdef DEBUG
+        Serial.print(MQTT_SET_LONG_COEF);
         Serial.print("  raconte: ");
         Serial.println(payload);
 #endif
