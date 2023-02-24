@@ -1,5 +1,3 @@
-// platformio run --target uploadfs // cmd console download spiff
-
 #include <Arduino.h>
 
 #define DEBUG 1
@@ -8,10 +6,10 @@
 #include "variable.h"
 #include "led.h"
 #include "random.h"
-#include "wifi_serv_setup.h"
 #include "mqtt.h"
 #include "gps.h"
 #include "rtc_clock.h"
+#include "eeprom_fonc.h"
 #include "deep_sleep.h"
 #include "btn.h"
 #include "pwm_loop.h"
@@ -24,9 +22,9 @@ void setup()
   Serial.println();
 #endif
 
-  //   // EEPROM
-  //   EEPROM.begin(EEPROM_SIZE);
-  //   init_eeprom();
+    // EEPROM
+    EEPROM.begin(EEPROM_SIZE);
+    init_eeprom();
 
     // init led
     init_led();
@@ -68,9 +66,9 @@ void setup()
       if (millis() > 5000 && gps.charsProcessed() < 10)
         Serial.println(F("No GPS data received: check wiring"));
     }
-    if (gps.time.isValid() && gps.date.isValid())
+    if (gps.time.isValid() && gps.date.isValid() && (gps.date.year() != 2000))
     {
-      Serial.println("GPS Time OK ");
+      Serial.print("GPS Time OK ");
       printDateTime(gps.date, gps.time);
       hasFix = true;
     }
