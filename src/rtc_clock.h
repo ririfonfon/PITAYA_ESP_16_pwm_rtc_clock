@@ -19,6 +19,22 @@ RtcDateTime alarmTime;
 // char DaysOfWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 char DaysOfWeek[7][12] = {"Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"};
 
+RtcDateTime now = Rtc.GetDateTime();
+
+DS3231AlarmOne alarm_one = Rtc.GetAlarmOne();
+    RtcDateTime time_on(now.Year(),
+                        now.Month(),
+                        now.Day(),
+                        alarm_one.Hour(),
+                        alarm_one.Minute(),
+                        alarm_one.Second());
+    RtcDateTime time_off(now.Year(),
+                         now.Month(),
+                         now.Day(),
+                         23,
+                         30,
+                         00);
+
 void printDateTime(const RtcDateTime &dt)
 {
     char datestring[20];
@@ -49,8 +65,8 @@ void publishTimeOn(const RtcDateTime &dt)
                dt.Minute(),
                dt.Second());
     mqtt_topic = String(MQTT) + String(ID) + String(MQTT_TIME_ON);
-    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
-    mqttClient.publish(MQTT_TOPIC, 0, true, datestring);
+    mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
+    mqttClient.publish(mqtt_topic_char, 0, true, datestring);
 }
 
 void publishTimeOff(const RtcDateTime &dt)
@@ -64,8 +80,8 @@ void publishTimeOff(const RtcDateTime &dt)
                dt.Minute(),
                dt.Second());
     mqtt_topic = String(MQTT) + String(ID) + String(MQTT_TIME_OFF);
-    mqtt_topic.toCharArray(MQTT_TOPIC, mqtt_topic.length() + 1);
-    mqttClient.publish(MQTT_TOPIC, 0, true, datestring);
+    mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
+    mqttClient.publish(mqtt_topic_char, 0, true, datestring);
 }
 
 void init_clock()
@@ -195,20 +211,8 @@ void alarm_set()
 
 void loop_clock_mqtt()
 {
-    RtcDateTime now = Rtc.GetDateTime();
-    DS3231AlarmOne alarm_one = Rtc.GetAlarmOne();
-    RtcDateTime time_on(now.Year(),
-                        now.Month(),
-                        now.Day(),
-                        alarm_one.Hour(),
-                        alarm_one.Minute(),
-                        alarm_one.Second());
-    RtcDateTime time_off(now.Year(),
-                         now.Month(),
-                         now.Day(),
-                         23,
-                         30,
-                         00);
+    now = Rtc.GetDateTime();
+    
 
     if (!Rtc.IsDateTimeValid())
     {
