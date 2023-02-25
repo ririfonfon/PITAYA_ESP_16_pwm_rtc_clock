@@ -11,8 +11,6 @@ extern "C"
 
 #include <RtcDS3231.h>
 
-void eeprom_write_time_on();
-void eeprom_write_time_off();
 void alarm_set();
 
 #define WIFI_SSID "riri_new"
@@ -50,6 +48,10 @@ String MQTT_SET_LAT_COEF = String(MQTT_ID) + "/set/lat_coef";
 String MQTT_SET_LONG_COEF = String(MQTT_ID) + "/set/long_coef";
 
 boolean wifihasFix = false;
+
+void Rtc_Eeprom_read(uint16_t Adresse);
+void Rtc_Eeprom_write(uint16_t Adresse, char Wdata);
+
 void connectToWifi()
 {
 #ifdef DEBUG
@@ -273,16 +275,13 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
 
         char *mqtt_set_time = NULL;
         mqtt_set_time = strtok(payload, ":");
-        time_on_Hour = atoi (mqtt_set_time);
+        time_on_Hour = atoi(mqtt_set_time);
         mqtt_set_time = strtok(NULL, ":");
-        time_on_Minute = atoi (mqtt_set_time);
+        time_on_Minute = atoi(mqtt_set_time);
         mqtt_set_time = strtok(NULL, ":");
-        time_on_Second = atoi (mqtt_set_time);
+        time_on_Second = atoi(mqtt_set_time);
 
         alarm_set();
-
-        // eeprom_write_time_on();
-
     }
     else if (strcmp(topic, mqtt_topic_char_set_time_off) == 0)
     {
@@ -296,22 +295,24 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
         mqtt_set_time = strtok(payload, ":");
         Serial.print("heure = ");
         Serial.print(mqtt_set_time);
-        time_off_Hour = int(mqtt_set_time);
+        time_off_Hour = atoi(mqtt_set_time);
         mqtt_set_time = strtok(NULL, ":");
         Serial.print(" minute = ");
         Serial.print(mqtt_set_time);
-        time_off_Minute = int(mqtt_set_time);
+        time_off_Minute = atoi(mqtt_set_time);
         mqtt_set_time = strtok(NULL, ":");
         Serial.print(" seconde = ");
         Serial.println(mqtt_set_time);
-        time_off_Second = int(mqtt_set_time);
+        time_off_Second = atoi(mqtt_set_time);
         RtcDateTime time_off(0,
                              0,
                              0,
                              time_off_Hour,
                              time_off_Minute,
                              time_off_Second);
-        eeprom_write_time_off();
+        char envoie[] = "ok man";
+        Rtc_Eeprom_write(64, *envoie);
+
 #endif
     }
     else if (strcmp(topic, mqtt_topic_char_set_alt_coef) == 0)
@@ -322,6 +323,7 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
         Serial.write(payload, len);
         Serial.println();
 #endif
+        Rtc_Eeprom_read(64);
     }
     else if (strcmp(topic, mqtt_topic_char_set_lat_coef) == 0)
     {
