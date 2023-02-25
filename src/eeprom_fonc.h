@@ -6,13 +6,13 @@
 
 void eeprom_read()
 {
-    uint8_t time_on_Hour = EEPROM.read(1);
-    uint8_t time_on_Minute = EEPROM.read(2);
-    uint8_t time_on_Second = EEPROM.read(3);
+    time_on_Hour = EEPROM.read(1);
+    time_on_Minute = EEPROM.read(2);
+    time_on_Second = EEPROM.read(3);
 
-    uint8_t time_off_Hour = EEPROM.read(11);
-    uint8_t time_off_Minute = EEPROM.read(12);
-    uint8_t time_off_Second = EEPROM.read(13);
+    time_off_Hour = EEPROM.read(11);
+    time_off_Minute = EEPROM.read(12);
+    time_off_Second = EEPROM.read(13);
 
     RtcDateTime time_on(now.Year(),
                         now.Month(),
@@ -47,13 +47,13 @@ void eeprom_read()
 
 void eeprom_write()
 {
-    EEPROM.write(1, time_on.Hour());
-    EEPROM.write(2, time_on.Minute());
-    EEPROM.write(3, time_on.Second());
+    EEPROM.write(1, time_on_Hour);
+    EEPROM.write(2, time_on_Minute);
+    EEPROM.write(3, time_on_Second);
 
-    EEPROM.write(11, time_off.Hour());
-    EEPROM.write(12, time_off.Minute());
-    EEPROM.write(13, time_off.Second());
+    EEPROM.write(11, time_off_Hour);
+    EEPROM.write(12, time_off_Minute);
+    EEPROM.write(13, time_off_Second);
 
     EEPROM.write(62, 'O');
     EEPROM.write(63, 'K');
@@ -61,18 +61,66 @@ void eeprom_write()
 
 #ifdef DEBUG
     Serial.println("EEPROM WRITE");
-    Serial.print(" time_on.Hour() : ");
-    Serial.print(time_on.Hour());
-    Serial.print(" time_on.Minute() : ");
-    Serial.print(time_on.Minute());
-    Serial.print(" time_on.Second() : ");
-    Serial.print(time_on.Second());
-    Serial.print("  time_off.Hour() : ");
-    Serial.print(time_off.Hour());
-    Serial.print(" time_off.Minute() : ");
-    Serial.print(time_off.Minute());
-    Serial.print(" time_off.Second() : ");
-    Serial.print(time_off.Second());
+    Serial.print(" time_on_Hour : ");
+    Serial.print(time_on_Hour);
+    Serial.print(" time_on_Minute : ");
+    Serial.print(time_on_Minute);
+    Serial.print(" time_on_Second : ");
+    Serial.print(time_on_Second);
+    Serial.print("  time_off_Hour : ");
+    Serial.print(time_off_Hour);
+    Serial.print(" time_off_Minute : ");
+    Serial.print(time_off_Minute);
+    Serial.print(" time_off_Second : ");
+    Serial.print(time_off_Second);
+    Serial.println(" ");
+
+#endif
+} // eeprom_write
+
+void eeprom_write_time_on()
+{
+    // alarm_set();
+
+    EEPROM.write(1, time_on_Hour);
+    EEPROM.write(2, time_on_Minute);
+    EEPROM.write(3, time_on_Second);
+
+    EEPROM.write(62, 'O');
+    EEPROM.write(63, 'K');
+    EEPROM.commit();
+
+#ifdef DEBUG
+    Serial.println("TIME_ON WRITE");
+    Serial.print(" time_on_Hour : ");
+    Serial.print(time_on_Hour);
+    Serial.print(" time_on_Minute : ");
+    Serial.print(time_on_Minute);
+    Serial.print(" time_on_Second : ");
+    Serial.print(time_on_Second);
+    Serial.println(" ");
+
+#endif
+} // eeprom_write
+
+void eeprom_write_time_off()
+{
+    EEPROM.write(11, time_off_Hour);
+    EEPROM.write(12, time_off_Minute);
+    EEPROM.write(13, time_off_Second);
+
+    EEPROM.write(62, 'O');
+    EEPROM.write(63, 'K');
+    EEPROM.commit();
+
+#ifdef DEBUG
+    Serial.println("TIME_OFF WRITE");
+    Serial.print("  time_off_Hour : ");
+    Serial.print(time_off_Hour);
+    Serial.print(" time_off_Minute : ");
+    Serial.print(time_off_Minute);
+    Serial.print(" time_off_Second : ");
+    Serial.print(time_off_Second);
     Serial.println(" ");
 
 #endif
