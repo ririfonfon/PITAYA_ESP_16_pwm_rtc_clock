@@ -158,14 +158,21 @@ void init_clock()
 
 void Rtc_Eeprom_write(uint16_t Adresse, char Wdata)
 {
+    Serial.print("Wdata = ");
+    Serial.print(Wdata);
+    Serial.print(" sizeof(Wdata) - 1 = ");
+    Serial.print(sizeof(Wdata) - 1);
+    Serial.println();
     // store starting address of string
     RtcEeprom.SetMemory(0, Adresse);
     // store the string, nothing longer than 32 bytes due to paging
-
     uint8_t written = RtcEeprom.SetMemory(Adresse, (const uint8_t *)&Wdata, sizeof(Wdata) - 1); // remove the null terminator strings add
     // store the length of the string
     RtcEeprom.SetMemory(1, written); // store the
     /* end of comment out section */
+    Serial.print("written = ");
+    Serial.print(written);
+    Serial.println();
 }
 
 void Rtc_Eeprom_read(uint16_t Adresse)
