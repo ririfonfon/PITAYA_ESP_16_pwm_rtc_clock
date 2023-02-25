@@ -8,8 +8,7 @@
 RtcDS3231<TwoWire> Rtc(Wire);
 EepromAt24c32<TwoWire> RtcEeprom(Wire);
 
-const char data[] = "What time is it in Greenwich?";
-const uint16_t stringAddr = 64; // stored on page boundary
+// char Wdata[] = "What time is it in Greenwich?";
 
 #define countof(a) (sizeof(a) / sizeof(a[0]))
 
@@ -22,18 +21,18 @@ char DaysOfWeek[7][12] = {"Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Ve
 RtcDateTime now = Rtc.GetDateTime();
 
 DS3231AlarmOne alarm_one = Rtc.GetAlarmOne();
-    RtcDateTime time_on(now.Year(),
-                        now.Month(),
-                        now.Day(),
-                        alarm_one.Hour(),
-                        alarm_one.Minute(),
-                        alarm_one.Second());
-    RtcDateTime time_off(now.Year(),
-                         now.Month(),
-                         now.Day(),
-                         23,
-                         30,
-                         00);
+RtcDateTime time_on(now.Year(),
+                    now.Month(),
+                    now.Day(),
+                    alarm_one.Hour(),
+                    alarm_one.Minute(),
+                    alarm_one.Second());
+RtcDateTime time_off(now.Year(),
+                     now.Month(),
+                     now.Day(),
+                     23,
+                     30,
+                     00);
 
 void printDateTime(const RtcDateTime &dt)
 {
@@ -155,16 +154,59 @@ void init_clock()
 
     /* comment out on a second run to see that the info is stored long term */
     // Store something in memory on the Eeprom
+}
 
+void Rtc_Eeprom_write(uint16_t Adresse, char Wdata)
+{
     // store starting address of string
-    RtcEeprom.SetMemory(0, stringAddr);
+    RtcEeprom.SetMemory(0, Adresse);
     // store the string, nothing longer than 32 bytes due to paging
-    uint8_t written = RtcEeprom.SetMemory(stringAddr, (const uint8_t *)data, sizeof(data) - 1); // remove the null terminator strings add
+
+    uint8_t written = RtcEeprom.SetMemory(Adresse, (const uint8_t *)&Wdata, sizeof(Wdata) - 1); // remove the null terminator strings add
     // store the length of the string
     RtcEeprom.SetMemory(1, written); // store the
     /* end of comment out section */
 }
 
+void Rtc_Eeprom_read(uint16_t Adresse)
+{
+    // read data
+
+    // get the offset we stored our data from address zero
+    uint8_t check_address = RtcEeprom.GetMemory(0);
+    if (check_address != Adresse)
+    {
+        Serial.print("check_address didn't match ");
+        Serial.println(check_address);
+    }
+
+    {
+        // get the size of the data from address 1
+        uint8_t count = RtcEeprom.GetMemory(1);
+        uint8_t buff[64];
+
+        // get our data from the address with the given size
+        uint8_t gotten = RtcEeprom.GetMemory(check_address, buff, count);
+
+        // if (gotten != count || count != sizeof(data) - 1) // remove the extra null terminator strings add
+        if (gotten != count) // remove the extra null terminator strings add
+        {
+            Serial.print("something didn't match, count = ");
+            Serial.print(count, DEC);
+            Serial.print(", gotten = ");
+            Serial.print(gotten, DEC);
+            Serial.println();
+        }
+        Serial.print("data read (");
+        Serial.print(gotten);
+        Serial.print(") = \"");
+        for (uint8_t ch = 0; ch < gotten; ch++)
+        {
+            Serial.print((char)buff[ch]);
+        }
+        Serial.println("\"");
+    }
+}
 void alarm_set()
 {
 
@@ -182,17 +224,25 @@ void alarm_set()
     // Alarm 1 set to trigger every day when
     // the hours, minutes, and seconds match
 
-    alarmTime = Rtc.GetDateTime() + 60; // into the future
+    // alarmTime = Rtc.GetDateTime() + 60; // into the future
 
-    Serial.print(" next alarm set to ");
-    printDateTime(alarmTime);
-    Serial.println(" ");
+    // Serial.print(" next alarm set to ");
+    // printDateTime(alarmTime);
+    // Serial.println(" ");
+
+    // DS3231AlarmOne alarm1(
+    //     alarmTime.Day(),
+    //     alarmTime.Hour(),
+    //     alarmTime.Minute(),
+    //     alarmTime.Second(),
+    //     DS3231AlarmOneControl_HoursMinutesSecondsMatch);
+    // Rtc.SetAlarmOne(alarm1);
 
     DS3231AlarmOne alarm1(
-        alarmTime.Day(),
-        alarmTime.Hour(),
-        alarmTime.Minute(),
-        alarmTime.Second(),
+        0,
+        time_on_Hour,
+        time_on_Minute,
+        time_on_Second,
         DS3231AlarmOneControl_HoursMinutesSecondsMatch);
     Rtc.SetAlarmOne(alarm1);
 
@@ -212,7 +262,13 @@ void alarm_set()
 void loop_clock_mqtt()
 {
     now = Rtc.GetDateTime();
-    
+    alarm_one = Rtc.GetAlarmOne();
+    RtcDateTime time_on(now.Year(),
+                        now.Month(),
+                        now.Day(),
+                        alarm_one.Hour(),
+                        alarm_one.Minute(),
+                        alarm_one.Second());
 
     if (!Rtc.IsDateTimeValid())
     {
@@ -234,41 +290,22 @@ void loop_clock_mqtt()
         return;
     }
 
-    if (old < now - 60)
+    if (old < now - 59)
     {
         old = now;
 
+#ifdef DEBUG
         printDateTime(now);
-        Serial.print("      **         time_on : ");
+        Serial.print("      **      time_on : ");
         printDateTime(time_on);
+        Serial.print("      **      time_off : ");
+        printDateTime(time_off);
+        Serial.println();
+#endif
+
         publishTimeOn(time_on);
         publishTimeOff(time_off);
-
-        Serial.println();
-
-        // read data
-
-        // get the offset we stored our data from address zero
-        uint8_t address = RtcEeprom.GetMemory(0);
-        if (address != stringAddr)
-        {
-            Serial.print("address didn't match ");
-            Serial.println(address);
-        }
     }
-
-    // if (time_on < Rtc.GetDateTime() - 60)
-    // {
-    //     Serial.println(" ");
-    //     Serial.print(" time_on : ");
-    //     printDateTime(time_on);
-    //     Serial.print(" time - 60 : ");
-    //     printDateTime(Rtc.GetDateTime() - 60);
-    //     Serial.println(" ");
-
-    //     alarm_set();
-    //     deep = true;
-    // }
 
     return;
 }
