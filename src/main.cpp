@@ -22,9 +22,9 @@ void setup()
   Serial.println();
 #endif
 
-    // EEPROM
-    EEPROM.begin(EEPROM_SIZE);
-    init_eeprom();
+    // // EEPROM
+    // EEPROM.begin(EEPROM_SIZE);
+    // init_eeprom();
 
     // init led
     init_led();
