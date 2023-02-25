@@ -41,4 +41,12 @@ bool start = true;
 
 bool deep = false;
 
+uint8_t time_on_Hour;
+uint8_t time_on_Minute;
+uint8_t time_on_Second;
+
+uint8_t time_off_Hour;
+uint8_t time_off_Minute;
+uint8_t time_off_Second;
+
 #endif
