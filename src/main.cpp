@@ -9,7 +9,6 @@
 #include "mqtt.h"
 #include "gps.h"
 #include "rtc_clock.h"
-#include "eeprom_fonc.h"
 #include "deep_sleep.h"
 #include "btn.h"
 #include "pwm_loop.h"
