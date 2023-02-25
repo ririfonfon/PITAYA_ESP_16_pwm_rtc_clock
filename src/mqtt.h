@@ -9,6 +9,12 @@ extern "C"
 }
 #include <AsyncMqttClient.h>
 
+#include <RtcDS3231.h>
+
+void eeprom_write_time_on();
+void eeprom_write_time_off();
+void alarm_set();
+
 #define WIFI_SSID "riri_new"
 #define WIFI_PASSWORD "B2az41opbn6397"
 
@@ -37,11 +43,11 @@ String MQTT_TIME_ON = "/timeon";
 String MQTT_TIME_OFF = "/timeoff";
 
 String MQTT_ID = String(MQTT) + String(ID);
-String MQTT_SET_TIME_ON = String (MQTT_ID) + "/set/time_on";
-String MQTT_SET_TIME_OFF = String (MQTT_ID) + "/set/time_off";
-String MQTT_SET_ALT_COEF = String (MQTT_ID) + "/set/alt_coef";
-String MQTT_SET_LAT_COEF = String (MQTT_ID) + "/set/lat_coef";
-String MQTT_SET_LONG_COEF = String (MQTT_ID) + "/set/long_coef";
+String MQTT_SET_TIME_ON = String(MQTT_ID) + "/set/time_on";
+String MQTT_SET_TIME_OFF = String(MQTT_ID) + "/set/time_off";
+String MQTT_SET_ALT_COEF = String(MQTT_ID) + "/set/alt_coef";
+String MQTT_SET_LAT_COEF = String(MQTT_ID) + "/set/lat_coef";
+String MQTT_SET_LONG_COEF = String(MQTT_ID) + "/set/long_coef";
 
 boolean wifihasFix = false;
 void connectToWifi()
@@ -158,8 +164,6 @@ void onMqttConnect(bool sessionPresent)
     Serial.print(" TOPIC : ");
     Serial.println(mqtt_topic_char);
 #endif
-
-
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason)
@@ -197,11 +201,11 @@ void onMqttUnsubscribe(uint16_t packetId)
 void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties properties, size_t len, size_t index, size_t total)
 {
     MQTT_ID.toCharArray(mqtt_topic_char_id, MQTT_ID.length() + 1);
-    MQTT_SET_TIME_ON.toCharArray(mqtt_topic_char_set_time_on, MQTT_ID.length() + 1);
-    MQTT_SET_TIME_OFF.toCharArray(mqtt_topic_char_set_time_off, MQTT_ID.length() + 1);
-    MQTT_SET_ALT_COEF.toCharArray(mqtt_topic_char_set_alt_coef, MQTT_ID.length() + 1);
-    MQTT_SET_LAT_COEF.toCharArray(mqtt_topic_char_set_lat_coef, MQTT_ID.length() + 1);
-    MQTT_SET_LONG_COEF.toCharArray(mqtt_topic_char_set_long_coef, MQTT_ID.length() + 1);
+    MQTT_SET_TIME_ON.toCharArray(mqtt_topic_char_set_time_on, MQTT_SET_TIME_ON.length() + 1);
+    MQTT_SET_TIME_OFF.toCharArray(mqtt_topic_char_set_time_off, MQTT_SET_TIME_OFF.length() + 1);
+    MQTT_SET_ALT_COEF.toCharArray(mqtt_topic_char_set_alt_coef, MQTT_SET_ALT_COEF.length() + 1);
+    MQTT_SET_LAT_COEF.toCharArray(mqtt_topic_char_set_lat_coef, MQTT_SET_LAT_COEF.length() + 1);
+    MQTT_SET_LONG_COEF.toCharArray(mqtt_topic_char_set_long_coef, MQTT_SET_LONG_COEF.length() + 1);
     // Serial.print("MQTT_SET_TIME_ON :");
     // Serial.println(MQTT_SET_TIME_ON);
     // Serial.print("MQTT_SET_TIME_OFF :");
@@ -212,6 +216,17 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
     // Serial.println(MQTT_SET_LAT_COEF);
     // Serial.print("MQTT_SET_LONG_COEF :");
     // Serial.println(MQTT_SET_LONG_COEF);
+
+    // Serial.print("mqtt_topic_char_set_time_on :");
+    // Serial.println(mqtt_topic_char_set_time_on);
+    // Serial.print("mqtt_topic_char_set_time_off :");
+    // Serial.println(mqtt_topic_char_set_time_off);
+    // Serial.print("mqtt_topic_char_set_alt_coef :");
+    // Serial.println(mqtt_topic_char_set_alt_coef);
+    // Serial.print("mqtt_topic_char_set_lat_coef :");
+    // Serial.println(mqtt_topic_char_set_lat_coef);
+    // Serial.print("mqtt_topic_char_set_long_coef :");
+    // Serial.println(mqtt_topic_char_set_long_coef);
 #ifdef DEBUG
     Serial.print("Publish received. ");
     Serial.print("  topic: ");
@@ -234,7 +249,8 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
 #ifdef DEBUG
         Serial.print("gps/all  ");
         Serial.print("  raconte: ");
-        Serial.println(payload);
+        Serial.write(payload, len);
+        Serial.println();
 #endif
     }
     else if (strcmp(topic, mqtt_topic_char_id) == 0)
@@ -242,24 +258,60 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
 #ifdef DEBUG
         Serial.print(MQTT_ID);
         Serial.print("  raconte: ");
-        Serial.println(payload);
+        Serial.write(payload, len);
+        Serial.println();
 #endif
     }
-    else if (strcmp(topic, "gps/12/set/time_on") == 0)
-    // else if (strcmp(topic, mqtt_topic_char_set_time_on) == 0)
+    else if (strcmp(topic, mqtt_topic_char_set_time_on) == 0)
     {
 #ifdef DEBUG
         Serial.print(MQTT_SET_TIME_ON);
         Serial.print("  raconte: ");
-        Serial.println(payload);
+        Serial.write(payload, len);
+        Serial.println();
 #endif
+
+        char *mqtt_set_time = NULL;
+        mqtt_set_time = strtok(payload, ":");
+        time_on_Hour = atoi (mqtt_set_time);
+        mqtt_set_time = strtok(NULL, ":");
+        time_on_Minute = atoi (mqtt_set_time);
+        mqtt_set_time = strtok(NULL, ":");
+        time_on_Second = atoi (mqtt_set_time);
+
+        alarm_set();
+
+        // eeprom_write_time_on();
+
     }
     else if (strcmp(topic, mqtt_topic_char_set_time_off) == 0)
     {
 #ifdef DEBUG
         Serial.print(MQTT_SET_TIME_OFF);
         Serial.print("  raconte: ");
-        Serial.println(payload);
+        Serial.write(payload, len);
+        Serial.println();
+
+        char *mqtt_set_time = NULL;
+        mqtt_set_time = strtok(payload, ":");
+        Serial.print("heure = ");
+        Serial.print(mqtt_set_time);
+        time_off_Hour = int(mqtt_set_time);
+        mqtt_set_time = strtok(NULL, ":");
+        Serial.print(" minute = ");
+        Serial.print(mqtt_set_time);
+        time_off_Minute = int(mqtt_set_time);
+        mqtt_set_time = strtok(NULL, ":");
+        Serial.print(" seconde = ");
+        Serial.println(mqtt_set_time);
+        time_off_Second = int(mqtt_set_time);
+        RtcDateTime time_off(0,
+                             0,
+                             0,
+                             time_off_Hour,
+                             time_off_Minute,
+                             time_off_Second);
+        eeprom_write_time_off();
 #endif
     }
     else if (strcmp(topic, mqtt_topic_char_set_alt_coef) == 0)
@@ -267,7 +319,8 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
 #ifdef DEBUG
         Serial.print(MQTT_SET_ALT_COEF);
         Serial.print("  raconte: ");
-        Serial.println(payload);
+        Serial.write(payload, len);
+        Serial.println();
 #endif
     }
     else if (strcmp(topic, mqtt_topic_char_set_lat_coef) == 0)
@@ -275,7 +328,8 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
 #ifdef DEBUG
         Serial.print(MQTT_SET_LAT_COEF);
         Serial.print("  raconte: ");
-        Serial.println(payload);
+        Serial.write(payload, len);
+        Serial.println();
 #endif
     }
     else if (strcmp(topic, mqtt_topic_char_set_long_coef) == 0)
@@ -283,7 +337,8 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
 #ifdef DEBUG
         Serial.print(MQTT_SET_LONG_COEF);
         Serial.print("  raconte: ");
-        Serial.println(payload);
+        Serial.write(payload, len);
+        Serial.println();
 #endif
     }
 }
