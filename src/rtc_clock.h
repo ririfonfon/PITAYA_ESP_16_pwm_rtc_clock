@@ -3,10 +3,8 @@
 
 #include <Wire.h> // must be included here so that Arduino library object file references work
 #include <RtcDS3231.h>
-#include <EepromAT24C32.h>
 
 RtcDS3231<TwoWire> Rtc(Wire);
-EepromAt24c32<TwoWire> RtcEeprom(Wire);
 
 // char Wdata[] = "What time is it in Greenwich?";
 
@@ -88,7 +86,6 @@ void init_clock()
     //--------RTC SETUP ------------
 
     Rtc.Begin(22, 21); // the available pins for SDA, SCL
-    RtcEeprom.Begin();
 
     RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
 
@@ -156,64 +153,6 @@ void init_clock()
     // Store something in memory on the Eeprom
 }
 
-void Rtc_Eeprom_write(uint16_t Adresse, char Wdata)
-{
-    Serial.print("Wdata = ");
-    Serial.print(Wdata);
-    Serial.print(" sizeof(Wdata) - 1 = ");
-    Serial.print(sizeof(Wdata) - 1);
-    Serial.println();
-    // store starting address of string
-    RtcEeprom.SetMemory(0, Adresse);
-    // store the string, nothing longer than 32 bytes due to paging
-    uint8_t written = RtcEeprom.SetMemory(Adresse, (const uint8_t *)&Wdata, sizeof(Wdata) - 1); // remove the null terminator strings add
-    // store the length of the string
-    RtcEeprom.SetMemory(1, written); // store the
-    /* end of comment out section */
-    Serial.print("written = ");
-    Serial.print(written);
-    Serial.println();
-}
-
-void Rtc_Eeprom_read(uint16_t Adresse)
-{
-    // read data
-
-    // get the offset we stored our data from address zero
-    uint8_t check_address = RtcEeprom.GetMemory(0);
-    if (check_address != Adresse)
-    {
-        Serial.print("check_address didn't match ");
-        Serial.println(check_address);
-    }
-
-    {
-        // get the size of the data from address 1
-        uint8_t count = RtcEeprom.GetMemory(1);
-        uint8_t buff[64];
-
-        // get our data from the address with the given size
-        uint8_t gotten = RtcEeprom.GetMemory(check_address, buff, count);
-
-        // if (gotten != count || count != sizeof(data) - 1) // remove the extra null terminator strings add
-        if (gotten != count) // remove the extra null terminator strings add
-        {
-            Serial.print("something didn't match, count = ");
-            Serial.print(count, DEC);
-            Serial.print(", gotten = ");
-            Serial.print(gotten, DEC);
-            Serial.println();
-        }
-        Serial.print("data read (");
-        Serial.print(gotten);
-        Serial.print(") = \"");
-        for (uint8_t ch = 0; ch < gotten; ch++)
-        {
-            Serial.print((char)buff[ch]);
-        }
-        Serial.println("\"");
-    }
-}
 void alarm_set()
 {
 

@@ -49,8 +49,7 @@ String MQTT_SET_LONG_COEF = String(MQTT_ID) + "/set/long_coef";
 
 boolean wifihasFix = false;
 
-void Rtc_Eeprom_read(uint16_t Adresse);
-void Rtc_Eeprom_write(uint16_t Adresse, char Wdata);
+
 
 void connectToWifi()
 {
@@ -310,8 +309,7 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
                              time_off_Hour,
                              time_off_Minute,
                              time_off_Second);
-        char envoie[] = "ok man";
-        Rtc_Eeprom_write(64, *envoie);
+
 
 #endif
     }
@@ -323,7 +321,6 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
         Serial.write(payload, len);
         Serial.println();
 #endif
-        Rtc_Eeprom_read(64);
     }
     else if (strcmp(topic, mqtt_topic_char_set_lat_coef) == 0)
     {

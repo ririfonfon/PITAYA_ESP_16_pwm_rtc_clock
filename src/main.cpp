@@ -9,6 +9,7 @@
 #include "mqtt.h"
 #include "gps.h"
 #include "rtc_clock.h"
+#include "eeprom_fonc.h"
 #include "deep_sleep.h"
 #include "btn.h"
 #include "pwm_loop.h"
@@ -22,8 +23,8 @@ void setup()
 #endif
 
     // // EEPROM
-    // EEPROM.begin(EEPROM_SIZE);
-    // init_eeprom();
+    EEPROM.begin(EEPROM_SIZE);
+    init_eeprom();
 
     // init led
     init_led();
@@ -71,6 +72,19 @@ void setup()
       printDateTime(gps.date, gps.time);
       hasFix = true;
     }
+    if (gps.time.isValid() && !gps.date.isValid())
+    {
+      Serial.print("GPS  date NO OK ");
+      printDateTime(gps.date, gps.time);
+      smartDelay(1000);
+    }
+    if (gps.time.isValid() && gps.date.isValid() && (gps.date.year() == 2000))
+    {
+      Serial.print("GPS date 2000 ");
+      printDateTime(gps.date, gps.time);
+      smartDelay(1000);
+    }
+
   }
 
   init_clock();
