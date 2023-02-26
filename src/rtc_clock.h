@@ -3,8 +3,10 @@
 
 #include <Wire.h> // must be included here so that Arduino library object file references work
 #include <RtcDS3231.h>
+#include <EepromAT24C32.h>
 
 RtcDS3231<TwoWire> Rtc(Wire);
+EepromAt24c32<TwoWire> RtcEeprom(Wire);
 
 // char Wdata[] = "What time is it in Greenwich?";
 
@@ -28,9 +30,9 @@ RtcDateTime time_on(now.Year(),
 RtcDateTime time_off(now.Year(),
                      now.Month(),
                      now.Day(),
-                     23,
-                     30,
-                     00);
+                     time_off_Hour,
+                     time_off_Minute,
+                     time_off_Second);
 
 void printDateTime(const RtcDateTime &dt)
 {
@@ -45,7 +47,7 @@ void printDateTime(const RtcDateTime &dt)
                dt.Hour(),
                dt.Minute(),
                dt.Second());
-    Serial.print("RTC-> ");
+    Serial.print(" -> ");
     Serial.print(DaysOfWeek[dt.DayOfWeek()]);
     Serial.print(" ");
     Serial.print(datestring);
@@ -86,12 +88,16 @@ void init_clock()
     //--------RTC SETUP ------------
 
     Rtc.Begin(22, 21); // the available pins for SDA, SCL
+    RtcEeprom.Begin();
 
     RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
 
+#ifdef DEBUG
     Serial.print("compiled : ");
+    Serial.print("\t");
     printDateTime(compiled);
     Serial.println();
+#endif
 
     if (!Rtc.IsDateTimeValid())
     {
@@ -118,30 +124,30 @@ void init_clock()
 
     RtcDateTime now = Rtc.GetDateTime();
     RtcDateTime now_gps = RtcDateTime(gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second());
+#ifdef DEBUG
     Serial.print("now : ");
+    Serial.print("\t\t");
     printDateTime(now);
-    Serial.print(" now_gps : ");
+    Serial.println();
+    Serial.print("now_gps : ");
+    Serial.print("\t");
     printDateTime(now_gps);
     Serial.println();
 
-    // if (now < compiled)
-    // {
-    //     Serial.println("RTC is older than compile time!  (Updating DateTime)");
-    //     Rtc.SetDateTime(compiled);
-    // }
+    Serial.print("Pure now : ");
+    Serial.print("\t\t");
+    Serial.print(now);
+    Serial.println();
+    Serial.print("Pure compiled : ");
+    Serial.print("\t");
+    Serial.print(compiled);
+    Serial.println();
+#endif
 
-    if (now != now_gps)
+    if (now > compiled)
     {
-        bool zeroclock = false;
-        while (!zeroclock)
-        {
-            if (gps.time.centisecond() == 0)
-            {
-                Rtc.SetDateTime(now_gps);
-                Serial.println("RTC != than gps time!  (Updating DateTime)");
-                zeroclock = true;
-            }
-        }
+        Serial.println("RTC is older than compile time!  (Updating DateTime)");
+        Rtc.SetDateTime(compiled);
     }
 
     // never assume the Rtc was last configured by you, so
@@ -151,6 +157,52 @@ void init_clock()
 
     /* comment out on a second run to see that the info is stored long term */
     // Store something in memory on the Eeprom
+}
+
+void compare_clock_gps()
+{
+    RtcDateTime now = Rtc.GetDateTime();
+    RtcDateTime now_gps = RtcDateTime(gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second());
+    RtcDateTime now_gps_time_zone = now_gps + (time_zone * 3600);
+
+    if (now != now_gps_time_zone)
+    {
+#ifdef DEBUG
+        Serial.print("COMPARE now : ");
+        Serial.print("\t\t\t");
+        printDateTime(now);
+        Serial.println();
+        Serial.print("COMPARE now_gps_time_zone : ");
+        Serial.print("\t");
+        printDateTime(now_gps_time_zone);
+        Serial.println();
+
+        Serial.print("COMPARE Pure now : ");
+        Serial.print("\t\t\t");
+        Serial.print(now);
+        Serial.println();
+        Serial.print("COMPARE Pure now_gps : ");
+        Serial.print("\t\t\t");
+        Serial.print(now_gps);
+        Serial.println();
+        Serial.print("COMPARE Pure now_gps_time_zone : ");
+        Serial.print("\t");
+        Serial.print(now_gps_time_zone);
+        Serial.println();
+#endif
+
+        bool zeroclock = false;
+        while (!zeroclock)
+        {
+            if (gps.time.centisecond() == 0)
+            {
+                Rtc.SetDateTime(now_gps_time_zone);
+                Serial.println("RTC != than gps time!  (Updating DateTime)");
+                zeroclock = true;
+                old = now;
+            }
+        }
+    }
 }
 
 void alarm_set()
@@ -215,6 +267,12 @@ void loop_clock_mqtt()
                         alarm_one.Hour(),
                         alarm_one.Minute(),
                         alarm_one.Second());
+    RtcDateTime time_off(now.Year(),
+                         now.Month(),
+                         now.Day(),
+                         time_off_Hour,
+                         time_off_Minute,
+                         time_off_Second);
 
     if (!Rtc.IsDateTimeValid())
     {
@@ -224,14 +282,15 @@ void loop_clock_mqtt()
             // we have a communications error
             // see https://www.arduino.cc/en/Reference/WireEndTransmission for
             // what the number means
-            Serial.print("RTC communications error = ");
+            Serial.print("RTC loop communications error = ");
             Serial.println(Rtc.LastError());
+            init_clock();
         }
         else
         {
             // Common Causes:
             //    1) the battery on the device is low or even missing and the power line was disconnected
-            Serial.println("RTC lost confidence in the DateTime!");
+            Serial.println("RTC loop lost confidence in the DateTime!");
         }
         return;
     }
@@ -239,6 +298,8 @@ void loop_clock_mqtt()
     if (old < now - 59)
     {
         old = now;
+
+        compare_clock_gps();
 
 #ifdef DEBUG
         printDateTime(now);
