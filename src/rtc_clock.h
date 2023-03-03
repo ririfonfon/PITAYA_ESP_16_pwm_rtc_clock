@@ -136,11 +136,11 @@ void init_clock()
 
     Serial.print("Pure now : ");
     Serial.print("\t\t");
-    Serial.print(now);
+    Serial.print(now.TotalSeconds());
     Serial.println();
     Serial.print("Pure compiled : ");
     Serial.print("\t");
-    Serial.print(compiled);
+    Serial.print(compiled.TotalSeconds());
     Serial.println();
 #endif
 
@@ -179,15 +179,15 @@ void compare_clock_gps()
 
         Serial.print("COMPARE Pure now : ");
         Serial.print("\t\t\t");
-        Serial.print(now);
+        Serial.print(now.TotalSeconds());
         Serial.println();
         Serial.print("COMPARE Pure now_gps : ");
         Serial.print("\t\t\t");
-        Serial.print(now_gps);
+        Serial.print(now_gps.TotalSeconds());
         Serial.println();
         Serial.print("COMPARE Pure now_gps_time_zone : ");
         Serial.print("\t");
-        Serial.print(now_gps_time_zone);
+        Serial.print(now_gps_time_zone.TotalSeconds());
         Serial.println();
 #endif
 
