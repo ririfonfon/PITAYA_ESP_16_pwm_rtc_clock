@@ -3,6 +3,8 @@
 
 #include "Arduino.h"
 
+void clock_display();
+
 void init_btn()
 {
     pinMode(BTN_GPIOPIN, INPUT);
@@ -16,6 +18,7 @@ void check_btn()
     {
         loop_gps();
         loop_clock_mqtt();
+        clock_display();
 
         onboard_led.on = millis() % 400 < 200;
         onboard_led.update();

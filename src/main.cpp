@@ -13,6 +13,7 @@
 #include "deep_sleep.h"
 #include "btn.h"
 // #include "pwm_loop.h"
+#include "screen.h"
 
 void setup()
 {
@@ -21,6 +22,10 @@ void setup()
   Serial.begin(115200);
   Serial.println("Hello World!");
 #endif
+
+  // SCREEN
+  init_screen();
+  Serial.println("Screen ");
 
   // MQTT
   init_mqtt();
