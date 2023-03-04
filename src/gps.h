@@ -3,21 +3,21 @@
 
 #include <Arduino.h>
 #include <TinyGPSPlus.h>
-#include <SoftwareSerial.h>
+// #include <SoftwareSerial.h>
 #include <RtcDS3231.h>
 /*
    This sample code demonstrates the normal use of a TinyGPSPlus (TinyGPSPlus) object.
    It requires the use of SoftwareSerial, and assumes that you have a
    4800-baud serial GPS device hooked up on pins 4(rx) and 3(tx).
 */
-static const int RXPin = 16, TXPin = 17;
+// static const int RXPin = 16, TXPin = 17;
 static const uint32_t GPSBaud = 9600;
 
 // The TinyGPSPlus object
 TinyGPSPlus gps;
 
 // The serial connection to the GPS device
-SoftwareSerial ss(RXPin, TXPin);
+// SoftwareSerial ss(RXPin, TXPin);
 
 static void printDateTime(TinyGPSDate &d, TinyGPSTime &t);
 static void smartDelay(unsigned long ms);
@@ -29,11 +29,11 @@ static void publishLong(float val, bool valid, int len, int prec);
 
 void init_gps()
 {
-    ss.begin(GPSBaud);
+    Serial2.begin(GPSBaud);
     boolean hasFix = false;
     while (!hasFix)
     {
-        while (!ss.availableForWrite())
+        while (!Serial2.availableForWrite())
         {
             Serial.print(".");
             smartDelay(1000);
@@ -41,7 +41,7 @@ void init_gps()
             if (millis() > 5000 && gps.charsProcessed() < 10)
                 Serial.println(F("No GPS data received: check wiring"));
         }
-        if (ss.availableForWrite())
+        if (Serial2.availableForWrite())
         {
             Serial.println("SS OK");
             hasFix = true;
@@ -80,8 +80,8 @@ static void smartDelay(unsigned long ms)
     unsigned long start = millis();
     do
     {
-        while (ss.available())
-            gps.encode(ss.read());
+        while (Serial2.available())
+            gps.encode(Serial2.read());
     } while (millis() - start < ms);
 }
 

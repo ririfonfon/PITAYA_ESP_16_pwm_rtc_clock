@@ -55,4 +55,7 @@ int16_t alt_coef = 32145;
 
 int8_t time_zone = 1;
 
+unsigned long screen_off;
+bool display_off = false;
+
 #endif

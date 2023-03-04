@@ -3,6 +3,8 @@
 
 #include "Arduino.h"
 
+void clock_display();
+
 void init_btn()
 {
     pinMode(BTN_GPIOPIN, INPUT);
