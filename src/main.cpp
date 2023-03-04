@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-#define DEBUG 1
-#define ID 12
+// #define DEBUG 1
+#define ID 11
 
 #include "variable.h"
 #include "led.h"
@@ -17,10 +17,10 @@
 void setup()
 {
 // init serial
-#ifdef DEBUG
+// #ifdef DEBUG
   Serial.begin(115200);
   Serial.println("Hello World!");
-#endif
+// #endif
 
   // MQTT
   init_mqtt();
@@ -82,7 +82,7 @@ void setup()
     if (gps.time.isValid() && gps.date.isValid() && (gps.date.year() != 2000))
     {
       Serial.print("GPS Time OK ");
-      printDateTime(gps.date, gps.time);
+      printDateTime_GPS(gps.date, gps.time);
       Serial.println();
       compare_clock_gps();
       hasFix = true;
@@ -90,13 +90,13 @@ void setup()
     if (gps.time.isValid() && !gps.date.isValid())
     {
       Serial.print("GPS  date NO OK ");
-      printDateTime(gps.date, gps.time);
+      printDateTime_GPS(gps.date, gps.time);
       smartDelay(1000);
     }
     if (gps.time.isValid() && gps.date.isValid() && (gps.date.year() == 2000))
     {
       Serial.print("GPS date 2000 ");
-      printDateTime(gps.date, gps.time);
+      printDateTime_GPS(gps.date, gps.time);
       smartDelay(1000);
     }
   }

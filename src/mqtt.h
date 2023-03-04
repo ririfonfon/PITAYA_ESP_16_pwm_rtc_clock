@@ -35,6 +35,7 @@ char mqtt_topic_char_set_long_coef[32];
 
 String mqtt_topic;
 String MQTT = "gps/";
+String MQTT_TIME = "/time";
 String MQTT_SAT = "/sat";
 String MQTT_ALT = "/alt";
 String MQTT_LONG = "/long";
@@ -42,14 +43,15 @@ String MQTT_LAT = "/lat";
 String MQTT_TIME_ON = "/timeon";
 String MQTT_TIME_OFF = "/timeoff";
 
-String MQTT_ID = String(MQTT) + String(ID);
-String MQTT_ALL = String(MQTT) + "all";
-String MQTT_SET_TIME_ON = String(MQTT_ALL) + "/set/time_on";
-String MQTT_SET_TIME_OFF = String(MQTT_ALL) + "/set/time_off";
-String MQTT_SET_TIME_ZONE = String(MQTT_ALL) + "/set/time_zone";
-String MQTT_SET_ALT_COEF = String(MQTT_ID) + "/set/alt_coef";
-String MQTT_SET_LAT_COEF = String(MQTT_ID) + "/set/lat_coef";
-String MQTT_SET_LONG_COEF = String(MQTT_ID) + "/set/long_coef";
+String MQTT_ID = MQTT + ID;
+String MQTT_ALL = MQTT + "all";
+String MQTT_SET_TIME_ON = MQTT_ALL + "/set/time_on";
+String MQTT_SET_TIME_OFF = MQTT_ALL + "/set/time_off";
+String MQTT_SET_TIME_ZONE = MQTT_ALL + "/set/time_zone";
+String MQTT_SET_ALT_COEF = MQTT_ID + "/set/alt_coef";
+String MQTT_ID_TIME = MQTT_ID + MQTT_TIME;
+String MQTT_SET_LAT_COEF = MQTT_ID + "/set/lat_coef";
+String MQTT_SET_LONG_COEF = MQTT_ID + "/set/long_coef";
 
 boolean wifihasFix = false;
 
@@ -176,6 +178,14 @@ void onMqttConnect(bool sessionPresent)
 #ifdef DEBUG
     Serial.print("Subscribing at QoS 2, packetId: ");
     Serial.print(packetIdSub8);
+    Serial.print(" TOPIC : ");
+    Serial.println(mqtt_topic_char);
+#endif
+MQTT_ID_TIME.toCharArray(mqtt_topic_char, MQTT_ID_TIME.length() + 1);
+    uint16_t packetIdSub9 = mqttClient.subscribe(mqtt_topic_char, 2);
+#ifdef DEBUG
+    Serial.print("Subscribing at QoS 2, packetId: ");
+    Serial.print(packetIdSub9);
     Serial.print(" TOPIC : ");
     Serial.println(mqtt_topic_char);
 #endif

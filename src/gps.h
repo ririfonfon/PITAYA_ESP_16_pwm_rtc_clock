@@ -67,7 +67,7 @@ void loop_gps()
 
     // printDateTime(gps.date, gps.time);
 
-    smartDelay(1000);
+    smartDelay(0);
 
     if (millis() > 5000 && gps.charsProcessed() < 10)
         Serial.println(F("No GPS data received: check wiring"));
@@ -146,19 +146,21 @@ static void publishSat(unsigned long val, bool valid, int len)
 {
     char sz[32] = "*****************";
     if (valid)
+    {
         sprintf(sz, "%ld", val);
-    sz[len] = 0;
-    for (int i = strlen(sz); i < len; ++i)
-        sz[i] = ' ';
-    if (len > 0)
-        sz[len - 1] = ' ';
-    mqtt_topic = String(MQTT) + String(ID) + String(MQTT_SAT);
-    mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
-    mqttClient.publish(mqtt_topic_char, 0, true, sz);
-    smartDelay(0);
+        sz[len] = 0;
+        for (int i = strlen(sz); i < len; ++i)
+            sz[i] = ' ';
+        if (len > 0)
+            sz[len - 1] = ' ';
+        mqtt_topic = String(MQTT) + String(ID) + String(MQTT_SAT);
+        mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
+        mqttClient.publish(mqtt_topic_char, 0, true, sz);
+        smartDelay(0);
+    }
 }
 
-static void printDateTime(TinyGPSDate &d, TinyGPSTime &t)
+static void printDateTime_GPS(TinyGPSDate &d, TinyGPSTime &t)
 {
     if (!d.isValid())
     {

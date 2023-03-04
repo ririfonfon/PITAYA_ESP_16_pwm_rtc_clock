@@ -16,10 +16,12 @@ void check_btn()
     {
         loop_gps();
         loop_clock_mqtt();
-
-        onboard_led.on = millis() % 400 < 200;
+        // RtcDateTime now = Rtc.GetDateTime();
+        // onboard_led.on = now.Second() % 2;
+        onboard_led.on = gps.time.second() % 2;
         onboard_led.update();
         digitalWrite(CMD_GPIOPIN, HIGH);
+        smartDelay(0);
     }
     digitalWrite(CMD_GPIOPIN, LOW);
 }

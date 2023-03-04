@@ -53,6 +53,23 @@ void printDateTime(const RtcDateTime &dt)
     Serial.print(datestring);
 }
 
+void publishGpsTime(TinyGPSTime &t)
+{
+    char datestring[32];
+
+    snprintf_P(datestring,
+               countof(datestring),
+               PSTR("%02u:%02u:%02u:%02u:%02u"),
+               t.hour(),
+               t.minute(),
+               t.second(),
+               t.centisecond(),
+               t.age());
+    mqtt_topic = String(MQTT_ID_TIME);
+    mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
+    mqttClient.publish(mqtt_topic_char, 0, true, datestring);
+}
+
 void publishTimeOn(const RtcDateTime &dt)
 {
     char datestring[20];
@@ -144,7 +161,7 @@ void init_clock()
     Serial.println();
 #endif
 
-    if (now > compiled)
+    if (now < compiled)
     {
         Serial.println("RTC is older than compile time!  (Updating DateTime)");
         Rtc.SetDateTime(compiled);
@@ -167,7 +184,7 @@ void compare_clock_gps()
 
     if (now != now_gps_time_zone)
     {
-#ifdef DEBUG
+        // #ifdef DEBUG
         Serial.print("COMPARE now : ");
         Serial.print("\t\t\t");
         printDateTime(now);
@@ -189,14 +206,20 @@ void compare_clock_gps()
         Serial.print("\t");
         Serial.print(now_gps_time_zone);
         Serial.println();
-#endif
+        Serial.print("COMPARE gps.time.age() : ");
+        Serial.print("\t\t\t");
+        Serial.print(gps.time.age());
+        // #endif
 
         bool zeroclock = false;
         while (!zeroclock)
         {
-            if (gps.time.centisecond() == 0)
+            // if ((gps.time.centisecond() - ceil(gps.time.age() / 10)) == 0)
+            if (gps.time.centisecond()  == 0)
             {
+                RtcDateTime now_gps_time_zone = now_gps + (time_zone * 3600);
                 Rtc.SetDateTime(now_gps_time_zone);
+                Serial.println();
                 Serial.println("RTC != than gps time!  (Updating DateTime)");
                 zeroclock = true;
                 old = now;
@@ -299,7 +322,7 @@ void loop_clock_mqtt()
     {
         old = now;
 
-        compare_clock_gps();
+        // compare_clock_gps();
 
 #ifdef DEBUG
         printDateTime(now);
@@ -312,6 +335,7 @@ void loop_clock_mqtt()
 
         publishTimeOn(time_on);
         publishTimeOff(time_off);
+        publishGpsTime(gps.time);
     }
 
     return;
