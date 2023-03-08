@@ -58,4 +58,6 @@ int8_t time_zone = 1;
 unsigned long screen_off;
 bool display_off = false;
 
+uint8_t compare_count = 0;
+
 #endif

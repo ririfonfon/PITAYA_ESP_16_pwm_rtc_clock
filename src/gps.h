@@ -31,6 +31,7 @@ void init_gps()
 {
     Serial2.begin(GPSBaud);
     boolean hasFix = false;
+    boolean serialFix = false;
     while (!hasFix)
     {
         while (!Serial2.availableForWrite())
@@ -43,8 +44,17 @@ void init_gps()
         }
         if (Serial2.availableForWrite())
         {
-            Serial.println("SS OK");
-            hasFix = true;
+            if (!serialFix)
+            {
+                Serial.println("SS OK");
+                hasFix = true;
+            }
+            serialFix = true;
+            // if (gps.time.isUpdated())
+            if (gps.time.isValid())
+            {
+                Serial.println("gps time is updated");
+            }
         }
     }
 }

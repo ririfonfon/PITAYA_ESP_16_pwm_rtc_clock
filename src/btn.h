@@ -18,6 +18,12 @@ void check_btn()
     {
         loop_gps();
         loop_clock_mqtt();
+        while (compare_count < 11)
+        {
+            compare_clock_gps();
+        }
+        clock_display();
+
         // RtcDateTime now = Rtc.GetDateTime();
         // onboard_led.on = now.Second() % 2;
         onboard_led.on = gps.time.second() % 2;

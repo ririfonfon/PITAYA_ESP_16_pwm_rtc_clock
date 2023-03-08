@@ -179,50 +179,81 @@ void init_clock()
 void compare_clock_gps()
 {
     RtcDateTime now = Rtc.GetDateTime();
+    smartDelay(0);
     RtcDateTime now_gps = RtcDateTime(gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second());
     RtcDateTime now_gps_time_zone = now_gps + (time_zone * 3600);
 
-    if (now != now_gps_time_zone)
+    if (2 <= now - now_gps_time_zone || now - now_gps_time_zone <= -2)
     {
         // #ifdef DEBUG
-        Serial.print("COMPARE now : ");
-        Serial.print("\t\t\t");
-        printDateTime(now);
-        Serial.println();
-        Serial.print("COMPARE now_gps_time_zone : ");
-        Serial.print("\t");
-        printDateTime(now_gps_time_zone);
-        Serial.println();
-
-        Serial.print("COMPARE Pure now : ");
-        Serial.print("\t\t\t");
-        Serial.print(now.TotalSeconds());
-        Serial.println();
-        Serial.print("COMPARE Pure now_gps : ");
-        Serial.print("\t\t\t");
-        Serial.print(now_gps.TotalSeconds());
-        Serial.println();
-        Serial.print("COMPARE Pure now_gps_time_zone : ");
-        Serial.print("\t");
-        Serial.print(now_gps_time_zone.TotalSeconds());
-        Serial.println();
-        Serial.print("COMPARE gps.time.age() : ");
-        Serial.print("\t\t\t");
-        Serial.print(gps.time.age());
         // #endif
 
         bool zeroclock = false;
+        bool zerosecage = false;
+        uint32_t sec;
+        uint32_t secage;
         while (!zeroclock)
         {
             // if ((gps.time.centisecond() - ceil(gps.time.age() / 10)) == 0)
-            if (gps.time.centisecond()  == 0)
+            // Serial.print(gps.time.centisecond()); // alway 0 ???
+
+            smartDelay(0);
+            // RtcDateTime now_gps = RtcDateTime(gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second());
+            // RtcDateTime now_gps_time_zone = now_gps + (time_zone * 3600);
+            while (!zerosecage)
             {
+                secage = millis() - gps.time.age();
+                zerosecage = true;
+                Serial.print(" secage :"); //
+                Serial.println(secage);    //
+            }
+
+            sec = millis() - secage;
+
+            // Serial.print(" sec : ");   //
+            // Serial.print(sec);         //
+
+            if (sec == gps.time.age())
+            {
+                smartDelay(0);
+                RtcDateTime now_gps = RtcDateTime(gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second());
                 RtcDateTime now_gps_time_zone = now_gps + (time_zone * 3600);
+
                 Rtc.SetDateTime(now_gps_time_zone);
+
+                // Serial.print("COMPARE now : ");
+                // Serial.print("\t\t\t");
+                // printDateTime(now);
+                // Serial.println();
+                // Serial.print("COMPARE now_gps_time_zone : ");
+                // Serial.print("\t");
+                // printDateTime(now_gps_time_zone);
+                // Serial.println();
+
+                // Serial.print("COMPARE Pure now : ");
+                // Serial.print("\t\t\t");
+                // Serial.print(now.TotalSeconds());
+                // Serial.println();
+                // Serial.print("COMPARE Pure now_gps : ");
+                // Serial.print("\t\t\t");
+                // Serial.print(now_gps.TotalSeconds());
+                // Serial.println();
+                // Serial.print("COMPARE Pure now_gps_time_zone : ");
+                // Serial.print("\t");
+                // Serial.print(now_gps_time_zone.TotalSeconds());
+                // Serial.println();
+                compare_count++;
+                Serial.print("COMPARE gps.time.age() : ");
+                Serial.print("\t\t");
+                Serial.print(gps.time.age());
                 Serial.println();
-                Serial.println("RTC != than gps time!  (Updating DateTime)");
+                Serial.print("compare count : ");
+                Serial.print("\t\t");
+                Serial.print(compare_count);
+
+                Serial.println();
+                // Serial.println("RTC != than gps time!  (Updating DateTime)");
                 zeroclock = true;
-                old = now;
             }
         }
     }
