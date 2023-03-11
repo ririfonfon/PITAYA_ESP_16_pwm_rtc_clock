@@ -53,17 +53,6 @@ void clock_display()
     RtcDateTime now_gps = RtcDateTime(gps.date.year(), gps.date.month(), gps.date.day(), gps.time.hour(), gps.time.minute(), gps.time.second());
     RtcDateTime now_gps_time_zone = now_gps + (time_zone * 3600);
 
-    if (now != now_gps_time_zone)
-    {
-        while (compare_count < 11)
-        {
-            compare_clock_gps();
-        }
-    }
-
-    // Serial.print(" ");
-    // Serial.print(gps.time.second());
-
     char gpstimestring[20];
 
     snprintf_P(gpstimestring,

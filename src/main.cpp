@@ -5,7 +5,8 @@
 
 #include "variable.h"
 #include "led.h"
-#include "random.h"
+#include "sk_led.h"
+// #include "random.h"
 #include "mqtt.h"
 #include "gps.h"
 #include "rtc_clock.h"
@@ -17,11 +18,15 @@
 
 void setup()
 {
-// init serial
-// #ifdef DEBUG
+  // init serial
+  // #ifdef DEBUG
   Serial.begin(115200);
   Serial.println("Hello World!");
-// #endif
+  // #endif
+
+  // SK
+  init_sk();
+  Serial.println("SK");
 
   // SCREEN
   init_screen();
@@ -89,7 +94,7 @@ void setup()
       Serial.print("GPS Time OK ");
       printDateTime_GPS(gps.date, gps.time);
       Serial.println();
-      compare_clock_gps();
+      // compare_clock_gps();
       hasFix = true;
     }
     if (gps.time.isValid() && !gps.date.isValid())
