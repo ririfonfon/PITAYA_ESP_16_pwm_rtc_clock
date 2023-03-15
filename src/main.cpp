@@ -24,6 +24,13 @@ void setup()
   Serial.println("Hello World!");
   // #endif
 
+  // init btn
+  init_btn();
+  Serial.println("btn");
+  digitalWrite(CMD_GPIOPIN, HIGH);
+  delay(3000);
+
+
   // SK
   init_sk();
   Serial.println("SK");
@@ -55,9 +62,6 @@ void setup()
   init_led();
   Serial.println("led");
 
-  // init btn
-  init_btn();
-  Serial.println("btn");
 
   //   // init pwm
   //   for (int k = 0; k < PWM_CHANNELS; k++)
