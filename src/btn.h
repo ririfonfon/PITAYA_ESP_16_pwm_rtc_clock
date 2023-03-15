@@ -36,8 +36,8 @@ void check_btn()
             for (int i = 0; i < PixelCount; i++)
             {
                 // strip.SetPixelColor(l_chose, white);
-                // strip.SetPixelColor(i, whiteC);
-                strip.SetPixelColor(i, Full);
+                strip.SetPixelColor(i, whiteC);
+                // strip.SetPixelColor(i, Full);
             }
         }
         else
