@@ -53,22 +53,22 @@ void printDateTime(const RtcDateTime &dt)
     Serial.print(datestring);
 }
 
-void publishGpsTime(TinyGPSTime &t)
-{
-    char datestring[32];
+// void publishGpsTime(TinyGPSTime &t)
+// {
+//     char datestring[32];
 
-    snprintf_P(datestring,
-               countof(datestring),
-               PSTR("%02u:%02u:%02u:%02u:%02u"),
-               t.hour(),
-               t.minute(),
-               t.second(),
-               t.centisecond(),
-               t.age());
-    mqtt_topic = String(MQTT_ID_TIME);
-    mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
-    mqttClient.publish(mqtt_topic_char, 0, true, datestring);
-}
+//     snprintf_P(datestring,
+//                countof(datestring),
+//                PSTR("%02u:%02u:%02u:%02u:%02u"),
+//                t.hour(),
+//                t.minute(),
+//                t.second(),
+//                t.centisecond(),
+//                t.age());
+//     mqtt_topic = String(MQTT_ID_TIME);
+//     mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
+//     mqttClient.publish(mqtt_topic_char, 0, true, datestring);
+// }
 
 void publishTimeOn(const RtcDateTime &dt)
 {
@@ -338,7 +338,7 @@ void loop_clock_mqtt()
 
         publishTimeOn(time_on);
         publishTimeOff(time_off);
-        publishGpsTime(gps.time);
+        // publishGpsTime(gps.time);
     }
 
     return;
