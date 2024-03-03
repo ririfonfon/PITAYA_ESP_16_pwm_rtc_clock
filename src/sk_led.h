@@ -14,7 +14,9 @@ RgbwColor red(colorSaturation, 0, 0, 0);
 RgbwColor green(0, colorSaturation, 0, 0);
 RgbwColor blue(0, 0, colorSaturation, 0);
 RgbwColor white(0, 0, 0, colorSaturation);
-RgbwColor whiteC(180, 0, 0, colorSaturation);
+RgbwColor whiteR(127, 0, 0, colorSaturation);
+RgbwColor whiteG(0, 127, 0, colorSaturation);
+RgbwColor whiteB(0, 0, 127, colorSaturation);
 RgbwColor Full(colorSaturation,colorSaturation,colorSaturation,colorSaturation);
 RgbwColor black(0);
 
