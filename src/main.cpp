@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 // #define DEBUG 1
-#define ID 12
+#define ID 1
 
 #include "variable.h"
 #include "led.h"
@@ -29,7 +29,6 @@ void setup()
   Serial.println("btn");
   digitalWrite(CMD_GPIOPIN, HIGH);
   delay(3000);
-
 
   // SK
   init_sk();
@@ -62,56 +61,40 @@ void setup()
   init_led();
   Serial.println("led");
 
-
-  //   // init pwm
-  //   for (int k = 0; k < PWM_CHANNELS; k++)
-  //   {
-  //     ledcAttachPin(PWM_GPIOPIN[k], k);
-  //     ledcSetup(k, PWM_FREQUENCY, PWM_RESOLUTION);
-  //   }
-
-  //   // random output
-  //   rnd();
-  // #ifdef DEBUG
-  //   for (int k = 0; k > FOR_PWM_CHANNELS; k++)
-  //   {
-  //     Serial.println(ref[k]);
-  //   }
-  // #endif
-
-  //   init_wifi();
-  //   WiFi.mode(WIFI_OFF);
-
-  boolean hasFix = false;
-  while (!hasFix)
+  if (digitalRead(BTN_GPIOPIN))
   {
-    while (!gps.time.isValid())
-    {
-      Serial.print("*");
-      smartDelay(1000);
 
-      if (millis() > 5000 && gps.charsProcessed() < 10)
-        Serial.println(F("No GPS data received: check wiring"));
-    }
-    if (gps.time.isValid() && gps.date.isValid() && (gps.date.year() != 2000))
+    boolean hasFix = false;
+    while (!hasFix)
     {
-      Serial.print("GPS Time OK ");
-      printDateTime_GPS(gps.date, gps.time);
-      Serial.println();
-      // compare_clock_gps();
-      hasFix = true;
-    }
-    if (gps.time.isValid() && !gps.date.isValid())
-    {
-      Serial.print("GPS  date NO OK ");
-      printDateTime_GPS(gps.date, gps.time);
-      smartDelay(1000);
-    }
-    if (gps.time.isValid() && gps.date.isValid() && (gps.date.year() == 2000))
-    {
-      Serial.print("GPS date 2000 ");
-      printDateTime_GPS(gps.date, gps.time);
-      smartDelay(1000);
+      while (!gps.time.isValid())
+      {
+        Serial.print("*");
+        smartDelay(1000);
+
+        if (millis() > 5000 && gps.charsProcessed() < 10)
+          Serial.println(F("No GPS data received: check wiring"));
+      }
+      if (gps.time.isValid() && gps.date.isValid() && (gps.date.year() != 2000))
+      {
+        Serial.print("GPS Time OK ");
+        printDateTime_GPS(gps.date, gps.time);
+        Serial.println();
+        // compare_clock_gps();
+        hasFix = true;
+      }
+      if (gps.time.isValid() && !gps.date.isValid())
+      {
+        Serial.print("GPS  date NO OK ");
+        printDateTime_GPS(gps.date, gps.time);
+        smartDelay(1000);
+      }
+      if (gps.time.isValid() && gps.date.isValid() && (gps.date.year() == 2000))
+      {
+        Serial.print("GPS date 2000 ");
+        printDateTime_GPS(gps.date, gps.time);
+        smartDelay(1000);
+      }
     }
   }
 
@@ -124,7 +107,7 @@ void loop()
 {
 
   check_btn();
-  // pwm_loop();
+
   // if (deep)
   // {
   //   deep = false;
