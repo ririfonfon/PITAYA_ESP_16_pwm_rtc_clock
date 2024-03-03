@@ -4,6 +4,7 @@
 #define PWM_CHANNELS 13    //
 #define PWM_FREQUENCY 5000 //
 #define PWM_RESOLUTION 16  //
+#define BTN_GPIOPIN2 04 //
 #define BTN_GPIOPIN 15 //
 #define CMD_GPIOPIN 32 //
 
