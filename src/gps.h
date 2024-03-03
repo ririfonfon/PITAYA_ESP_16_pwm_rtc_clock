@@ -26,6 +26,7 @@ static void publishSat(unsigned long val, bool valid, int len);
 static void publishLat(float val, bool valid, int len, int prec);
 static void publishAlt(float val, bool valid, int len, int prec);
 static void publishLong(float val, bool valid, int len, int prec);
+static void publishGpsTime(TinyGPSTime &t);
 
 void init_gps()
 {
@@ -59,16 +60,38 @@ void init_gps()
     }
 }
 
+// void loop_gps()
+// {
+//     if (gps.location.isUpdated())
+//     {
+//         publishLat(gps.location.lat(), gps.location.isValid(), 11, 6);
+//         publishLong(gps.location.lng(), gps.location.isValid(), 12, 6);
+//     }
+//     if (gps.altitude.isUpdated())
+//     {
+//         publishAlt(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
+//     }
+//     if (gps.satellites.isUpdated())
+//     {
+//         publishSat(gps.satellites.value(), gps.satellites.isValid(), 5);
+//     }
+
+//     // printDateTime(gps.date, gps.time);
+
+//     smartDelay(0);
+
+//     if (millis() > 5000 && gps.charsProcessed() < 10)
+//         Serial.println(F("No GPS data received: check wiring"));
+// }
+
 void loop_gps()
 {
-    if (gps.location.isUpdated())
+    if (gps.location.isUpdated() && gps.altitude.isUpdated())
     {
         publishLat(gps.location.lat(), gps.location.isValid(), 11, 6);
         publishLong(gps.location.lng(), gps.location.isValid(), 12, 6);
-    }
-    if (gps.altitude.isUpdated())
-    {
         publishAlt(gps.altitude.meters(), gps.altitude.isValid(), 7, 2);
+        publishGpsTime(gps.time);
     }
     if (gps.satellites.isUpdated())
     {
@@ -168,6 +191,23 @@ static void publishSat(unsigned long val, bool valid, int len)
         mqttClient.publish(mqtt_topic_char, 0, true, sz);
         smartDelay(0);
     }
+}
+
+static void publishGpsTime(TinyGPSTime &t)
+{
+    char datestring[32];
+
+    snprintf_P(datestring,
+               countof(datestring),
+               PSTR("%02u:%02u:%02u:%02u:%02u"),
+               t.hour(),
+               t.minute(),
+               t.second(),
+               t.centisecond(),
+               t.age());
+    mqtt_topic = String(MQTT_ID_TIME);
+    mqtt_topic.toCharArray(mqtt_topic_char, mqtt_topic.length() + 1);
+    mqttClient.publish(mqtt_topic_char, 0, true, datestring);
 }
 
 static void printDateTime_GPS(TinyGPSDate &d, TinyGPSTime &t)
